@@ -37,8 +37,8 @@ python -m mani_skill.examples.teleoperation.interactive_panda -e "TurnFaucet-v1"
 ```
 
 ### 2. Train Diffusion Policy
-```python
-# TODO
+```bash
+python train.py
 ```
 
 ### 3. Run "TurnFaucet-v1" as controlled the trained diffusion policy
