@@ -26,21 +26,34 @@ from models.datasets.maniskill_dataset import ManiSkillTrajectoryDataset
 dataset_path = "data/TurnFaucet-v1/teleop/trajectory.h5"
 zarr_path = "data/TurnFaucet-v1/teleop/trajectory.zarr"
 
+replay_buffer = RobotReplayBuffer.create_from_path(zarr_path, mode="a")
 trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=-1, success_only=True, device=None)
 
 data_dict = list()
 
+#print(len(trajectory_data))
+
 for data in trajectory_data:
+    data = {
+	"img" : data["obs"]["sensor_data"]["base_camera"]["rgb"],
+	"state" : data["obs"]["agent"]["qpos"],
+    } 
     data_dict.append({
-                        "obs": data["obs"],
+                        "data": data,
                         "action": data["action"]
                     })
-print(len(data_dict))
-print(data_dict[0]["obs"])
-print(data_dict[0]["action"])
 
-# replay_buffer = RobotReplayBuffer.create_from_path(zarr_path, mode="a")
-# replay_buffer.add_episode_from_list(data_dict, compressors="disk")
+replay_buffer.add_episode_from_list(data_dict, compressors="disk")
+
+'''
+print(len(data_dict))
+print(data_dict[0]["obs"]["agent"]["qpos"])
+print(data_dict[0]["obs"]["agent"]["qvel"])
+#img_dat = data_dict[1]["obs"]["sensor_data"]["base_camera"]["rgb"]
+print(img_dat.shape)
+print(img_dat)
+print(data_dict[0]["action"])
+'''
 
 # # parameters
 # pred_horizon = 16
