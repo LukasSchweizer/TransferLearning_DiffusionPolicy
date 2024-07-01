@@ -72,7 +72,7 @@ def unnormalize_data(ndata, stats):
     return data
 
 # dataset
-class PushTImageDataset(torch.utils.data.Dataset):
+class ImageDataset(torch.utils.data.Dataset):
     def __init__(self,
                  dataset_path: str,
                  pred_horizon: int,

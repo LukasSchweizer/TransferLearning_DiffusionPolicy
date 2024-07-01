@@ -23,7 +23,7 @@ cd ..
 git clone https://github.com/YanjieZe/3D-Diffusion-Policy.git && cd 3D-Diffusion-Policy
 cd 3D-Diffusion-Policy
 pip install -e .
-cd ..
+cd ../../TransferLearning_DiffusionPolicy
 ```
 You should now be in the activated conda environment, `dlproject`.
 
