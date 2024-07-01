@@ -1,0 +1,12 @@
+name: dlproject
+channels:
+  - defaults
+dependencies:
+  - pip=24.0=py39h06a4308_0
+  - python=3.9.19=h955ad1f_1
+  - pip:
+      - mani-skill==3.0.0b5
+      - torch==2.3.0
+      - torchaudio==2.3.0
+      - torchvision==0.18.0
+      - numpy==1.26.4
