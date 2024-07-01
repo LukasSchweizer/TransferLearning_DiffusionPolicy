@@ -12,6 +12,18 @@ chmod +x dlproject_conda_env
 
 # Collect Faucet Assets
 python -m mani_skill.utils.download_asset partnet_mobility_faucet
+
+# Install Real-Standford Diffusion Policy (RGD/State)
+cd ..
+git clone https://github.com/real-stanford/diffusion_policy.git && cd diffusion_policy
+pip install -e ../diffusion_policy
+
+# Install 3D Diffusion Policy (Point Cloud)
+cd ..
+git clone https://github.com/YanjieZe/3D-Diffusion-Policy.git && cd 3D-Diffusion-Policy
+cd 3D-Diffusion-Policy
+pip install -e .
+cd ..
 ```
 You should now be in the activated conda environment, `dlproject`.
 
