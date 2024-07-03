@@ -24,7 +24,6 @@ def main(args):
         reward_mode="sparse",
         # shader_dir="rt-fast",
     )
-
     env = RecordEpisode(
         env,
         output_dir=output_dir,
@@ -37,7 +36,7 @@ def main(args):
 
     num_trajs = 0
     seed = 0
-    env.reset(seed=seed)
+    env.reset(seed=seed, options=dict(object_id=args.object_id))
     while True:
         print(f"Collecting trajectory {num_trajs+1}, seed={seed}")
         code = solve(env, debug=False, vis=True)
@@ -47,10 +46,10 @@ def main(args):
         elif code == "continue":
             seed += 1
             num_trajs += 1
-            env.reset(seed=seed)
+            env.reset(seed=seed, options=dict(object_id=args.object_id))
             continue
         elif code == "restart":
-            env.reset(seed=seed, options=dict(save_trajectory=False))
+            env.reset(seed=seed, options=dict(save_trajectory=False, object_id=args.object_id))
     h5_file_path = env._h5_file.filename
     json_file_path = env._json_path
     env.close()
@@ -158,10 +157,10 @@ def solve(env: BaseEnv, debug=False, vis=False):
         elif viewer.window.key_press("g"):
             if gripper_open:
                 gripper_open = False
-                _, reward, _ ,_, info = planner.close_gripper()
+                _, reward, _, _, info = planner.close_gripper()
             else:
                 gripper_open = True
-                _, reward, _ ,_, info = planner.open_gripper()
+                _, reward, _, _, info = planner.open_gripper()
             print(f"Reward: {reward}, Info: {info}")
         # # TODO left, right depend on orientation really.
         # elif viewer.window.key_press("down"):
@@ -187,14 +186,25 @@ def solve(env: BaseEnv, debug=False, vis=False):
                 else: print("Generated motion plan was too long. Try a closer sub-goal")
             execute_current_pose = False
 
+def register_adapted_envs():
+    # Register AdaptedTurnFaucetEnv
+    gym.envs.registration.register(
+        id='AdaptedTurnFaucet-v1',
+        entry_point='adapted_turn_faucet_env:AdaptedTurnFaucetEnv',
+        max_episode_steps=200,
+    )
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--env-id", type=str, default="PegInsertionContact-v1")
+    parser.add_argument("-e", "--env-id", type=str, default="TurnFaucet-v1")
     parser.add_argument("-o", "--obs-mode", type=str, default="state")
     parser.add_argument("-r", "--robot-uid", type=str, default="panda", help="Robot setups supported are ['panda']")
-    parser.add_argument("--record-dir", type=str, default="testing")
+    parser.add_argument("--object-id", type=str, default=None)
+    parser.add_argument("--record-dir", type=str, default="../data")
     args, opts = parser.parse_known_args()
 
     return args
 if __name__ == "__main__":
+    register_adapted_envs()
+    print('AdaptedTurnFaucet-v1' in gym.envs.registry)
     main(parse_args())
