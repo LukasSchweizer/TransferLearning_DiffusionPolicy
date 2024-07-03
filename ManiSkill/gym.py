@@ -1,10 +1,12 @@
 import argparse
 
 import gymnasium as gym
-
+from data_collection.debug import plot_rgb, plot_point_cloud
 from mani_skill.agents.robots.panda.panda import Panda
 from mani_skill.utils import sapien_utils
 from mani_skill.envs.tasks.tabletop import turn_faucet
+
+import matplotlib.pyplot as plt
 
 
 def register_adapted_envs():

@@ -108,33 +108,10 @@ class AdaptedTurnFaucetEnv(TurnFaucetEnv):
         # Base Camera
         pose = sapien_utils.look_at([-0.4, 0, 0.3], [0, 0, 0.1])
         cameras.append(CameraConfig("base_camera", pose=pose, width=128, height=128, fov=np.pi / 2))
-        # Static Camera
-        pose = sapien.Pose(p=[1, 0, 0])
-        cameras.append(CameraConfig("static_camera", pose=pose, width=640, height=480, fov=np.pi / 2))
+        # Static Camera (not needed, because "base_camera" is already static)
+        # pose = sapien.Pose(p=[1, 0, 0])
+        # cameras.append(CameraConfig("static_camera", pose=pose, width=640, height=480, fov=np.pi / 2))
         return cameras
-
-    def _setup_static_camera(self):
-        near, far = 0.1, 100
-        width, height = 640, 480
-        self.static_camera = self.scene.add_camera(
-            name="static_camera",
-            width=width,
-            height=height,
-            fovy=np.deg2rad(35),
-            near=near,
-            far=far,
-            pose=sapien.Pose(p=[1, 0, 0])
-        )
-
-    def _get_static_camera_rgbd(self):
-        if self.static_camera is not None:
-            self.static_camera.take_picture()
-            rgba = None
-            depth = self.static_camera.get_depth()
-            rgbd = np.concatenate((rgba[:, :, :3], depth[:, :, np.newaxis]), axis=-1)  # Combine RGB and Depth
-            return rgbd
-        else:
-            return None
 
     def get_obs(self, info: Dict = None):
         # Get obs with state_dict data
