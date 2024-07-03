@@ -5,7 +5,7 @@ Repository for the "Deep Learning Lab" offered by the University Freiburg. This 
 With Miniconda installed on your machine, execute the setup script:
 ```bash
 # Allow file execution
-chmod +x dlproject_conda_env
+chmod +x conda_env_setup.sh
 
 # Execute setup script
 ./conda_env_setup.sh

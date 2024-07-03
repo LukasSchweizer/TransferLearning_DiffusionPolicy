@@ -189,10 +189,10 @@ def solve(env: BaseEnv, debug=False, vis=False):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--env-id", type=str, default="PegInsertionContact-v1")
+    parser.add_argument("-e", "--env-id", type=str, default="TurnFaucet-v1")
     parser.add_argument("-o", "--obs-mode", type=str, default="rgbd")
     parser.add_argument("-r", "--robot-uid", type=str, default="panda", help="Robot setups supported are ['panda']")
-    parser.add_argument("--record-dir", type=str, default="data")
+    parser.add_argument("--record-dir", type=str, default="demos")
     args, opts = parser.parse_known_args()
 
     return args

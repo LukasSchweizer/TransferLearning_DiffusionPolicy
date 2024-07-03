@@ -1,5 +1,6 @@
 from typing import Union
 
+import zarr
 import h5py
 import numpy as np
 from torch.utils.data import Dataset
@@ -7,6 +8,7 @@ from tqdm import tqdm
 
 from mani_skill.utils import common
 from mani_skill.utils.io_utils import load_json
+from utils.replay_buffer import RobotReplayBuffer
 
 
 # loads h5 data into memory for faster access
@@ -18,7 +20,6 @@ def load_h5_data(data):
         else:
             out[k] = load_h5_data(data[k])
     return out
-
 
 class ManiSkillTrajectoryDataset(Dataset):
     """
@@ -34,7 +35,7 @@ class ManiSkillTrajectoryDataset(Dataset):
     """
 
     def __init__(
-        self, dataset_file: str, load_count=-1, success_only: bool = False, device=None
+        self, dataset_file: str, load_count=-1, success_only: bool = False, device=None, zarr_path: str = None,
     ) -> None:
         self.dataset_file = dataset_file
         self.device = device
@@ -45,6 +46,7 @@ class ManiSkillTrajectoryDataset(Dataset):
         self.env_info = self.json_data["env_info"]
         self.env_id = self.env_info["env_id"]
         self.env_kwargs = self.env_info["env_kwargs"]
+        self.replay_buffer = RobotReplayBuffer.create_from_path(zarr_path, mode="a")
 
         self.obs = None
         self.actions = []
@@ -92,6 +94,7 @@ class ManiSkillTrajectoryDataset(Dataset):
                     self.fail = [trajectory["fail"]]
                 else:
                     self.fail.append(trajectory["fail"])
+            self.generate_zarr(obs, trajectory["actions"])
 
         self.actions = np.vstack(self.actions)
         self.terminated = np.concatenate(self.terminated)
@@ -152,3 +155,17 @@ class ManiSkillTrajectoryDataset(Dataset):
         if self.fail is not None:
             res.update(fail=self.fail[idx])
         return res
+    
+
+    def generate_zarr(self, obs, actions):
+        data_dict = list()
+        for i in range(len(actions)):
+            data_dict.append({
+                                "img" : obs["sensor_data"]["base_camera"]["rgb"][i].astype(np.float32),
+                                "state": np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
+                                "action": actions[i].astype(np.float32),
+                            })
+        print("Saving additional episode...")
+        self.replay_buffer.add_episode_from_list(data_dict, compressors="disk")
+        
+        

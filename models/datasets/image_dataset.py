@@ -90,7 +90,7 @@ class ImageDataset(torch.utils.data.Dataset):
         # (N, D)
         train_data = {
             # first two dims of state vector are agent (i.e. gripper) locations
-            'agent_pos': dataset_root['data']['state'][:,:2],
+            'agent_pos': dataset_root['data']['state'][:],
             'action': dataset_root['data']['action'][:]
         }
         episode_ends = dataset_root['meta']['episode_ends'][:]
