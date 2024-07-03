@@ -14,6 +14,7 @@ import mani_skill.trajectory.utils as trajectory_utils
 from mani_skill.utils import sapien_utils
 from mani_skill.utils.wrappers.record import RecordEpisode
 
+
 def main(args):
     output_dir = f"{args.record_dir}/{args.env_id}/teleop/"
     env = gym.make(
@@ -38,7 +39,7 @@ def main(args):
     seed = 0
     env.reset(seed=seed, options=dict(object_id=args.object_id))
     while True:
-        print(f"Collecting trajectory {num_trajs+1}, seed={seed}")
+        print(f"Collecting trajectory {num_trajs + 1}, seed={seed}")
         code = solve(env, debug=False, vis=True)
         if code == "quit":
             num_trajs += 1
@@ -89,7 +90,6 @@ def main(args):
     trajectory_data.close()
     env.close()
     del env
-
 
 
 def solve(env: BaseEnv, debug=False, vis=False):
@@ -177,14 +177,18 @@ def solve(env: BaseEnv, debug=False, vis=False):
         #     planner.grasp_pose_visual.set_pose(pose * sapien.Pose(p=[0, +0.01, 0]))
         if execute_current_pose:
             # z-offset of end-effector gizmo to TCP position is hardcoded for the panda robot here
-            result = planner.move_to_pose_with_screw(transform_window._gizmo_pose * sapien.Pose([0, 0, 0.102]), dry_run=True)
+            result = planner.move_to_pose_with_screw(transform_window._gizmo_pose * sapien.Pose([0, 0, 0.102]),
+                                                     dry_run=True)
             if result != -1 and len(result["position"]) < 100:
-                _, reward, _ ,_, info = planner.follow_path(result)
+                _, reward, _, _, info = planner.follow_path(result)
                 print(f"Reward: {reward}, Info: {info}")
             else:
-                if result == -1: print("Plan failed")
-                else: print("Generated motion plan was too long. Try a closer sub-goal")
+                if result == -1:
+                    print("Plan failed")
+                else:
+                    print("Generated motion plan was too long. Try a closer sub-goal")
             execute_current_pose = False
+
 
 def register_adapted_envs():
     # Register AdaptedTurnFaucetEnv
@@ -193,6 +197,7 @@ def register_adapted_envs():
         entry_point='adapted_turn_faucet_env:AdaptedTurnFaucetEnv',
         max_episode_steps=200,
     )
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -204,6 +209,8 @@ def parse_args():
     args, opts = parser.parse_known_args()
 
     return args
+
+
 if __name__ == "__main__":
     register_adapted_envs()
     print('AdaptedTurnFaucet-v1' in gym.envs.registry)
