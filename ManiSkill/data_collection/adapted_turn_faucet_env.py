@@ -1,19 +1,27 @@
 from typing import Dict, List, Union
 
 import numpy as np
+import sapien
 import sapien.physx as physx
 import torch
 
 from mani_skill.envs.tasks.tabletop.turn_faucet import TurnFaucetEnv
+from mani_skill.sensors import CameraConfig
 from mani_skill.utils.registration import register_env
 from mani_skill.envs.utils import randomization
 from mani_skill.utils import common, io_utils, sapien_utils
 from mani_skill.utils.building import actors, articulations
 from mani_skill.utils.registration import register_env
 from mani_skill.utils.scene_builder.table.scene_builder import TableSceneBuilder
+from mani_skill.utils.structs import RenderCamera
 from mani_skill.utils.structs.articulation import Articulation
 from mani_skill.utils.structs.link import Link
 from mani_skill.utils.structs.pose import Pose
+from mani_skill.envs.utils.observations import (
+    sensor_data_to_pointcloud,
+    sensor_data_to_rgbd,
+)
+
 
 @register_env("AdaptedTurnFaucet-v1", max_episode_steps=200)
 class AdaptedTurnFaucetEnv(TurnFaucetEnv):
@@ -31,6 +39,7 @@ class AdaptedTurnFaucetEnv(TurnFaucetEnv):
         else:
             rand_idx = self._episode_rng.permutation(np.arange(0, len(self.all_model_ids)))
             model_ids = self.all_model_ids[rand_idx]
+
         model_ids = np.concatenate(
             [model_ids] * np.ceil(self.num_envs / len(self.all_model_ids)).astype(int)
         )[: self.num_envs]
@@ -93,34 +102,54 @@ class AdaptedTurnFaucetEnv(TurnFaucetEnv):
         self.target_angle_diff = self.target_angle - self.init_angle
         self.target_joint_axis = torch.zeros((self.num_envs, 3), device=self.device)
 
-    def _initialize_episode(self, env_idx: torch.Tensor, options: dict):
-        with torch.device(self.device):
-            self.scene_builder.initialize(env_idx)
-            b = len(env_idx)
-            p = torch.zeros((b, 3))
-            p[:, :2] = randomization.uniform(-0.05, 0.05, size=(b, 2))
-            p[:, 2] = self.model_offsets[:, 2]
-            # p[:, 2] = 0.5
-            # ori = self._episode_rng.uniform(-np.pi / 12, np.pi / 12)
-            q = randomization.random_quaternions(
-                n=b, lock_x=True, lock_y=True, bounds=(-torch.pi / 12, torch.pi / 12)
-            )
-            self.faucet.set_pose(Pose.create_from_pq(p, q))
+    @property
+    def _default_sensor_configs(self):
+        cameras = []
+        # Base Camera
+        pose = sapien_utils.look_at([-0.4, 0, 0.3], [0, 0, 0.1])
+        cameras.append(CameraConfig("base_camera", pose=pose, width=128, height=128, fov=np.pi / 2))
+        # Static Camera
+        pose = sapien.Pose(p=[1, 0, 0])
+        cameras.append(CameraConfig("static_camera", pose=pose, width=640, height=480, fov=np.pi / 2))
+        return cameras
 
-            # apply pose changes and update kinematics to get updated link poses.
-            if physx.is_gpu_enabled():
-                self.scene._gpu_apply_all()
-                self.scene.px.gpu_update_articulation_kinematics()
-                self.scene.px.step()
-                self.scene._gpu_fetch_all()
+    def _setup_static_camera(self):
+        near, far = 0.1, 100
+        width, height = 640, 480
+        self.static_camera = self.scene.add_camera(
+            name="static_camera",
+            width=width,
+            height=height,
+            fovy=np.deg2rad(35),
+            near=near,
+            far=far,
+            pose=sapien.Pose(p=[1, 0, 0])
+        )
 
-            cmass_pose = (
-                    self.target_switch_link.pose * self.target_switch_link.cmass_local_pose
-            )
-            self.target_link_pos = cmass_pose.p
-            joint_pose = (
-                self.target_switch_link.joint.get_global_pose().to_transformation_matrix()
-            )
-            self.target_joint_axis[env_idx] = joint_pose[env_idx, :3, 0]
-            # self.handle_link_goal.set_pose(cmass_pose)
+    def _get_static_camera_rgbd(self):
+        if self.static_camera is not None:
+            self.static_camera.take_picture()
+            rgba = None
+            depth = self.static_camera.get_depth()
+            rgbd = np.concatenate((rgba[:, :, :3], depth[:, :, np.newaxis]), axis=-1)  # Combine RGB and Depth
+            return rgbd
+        else:
+            return None
+
+    def get_obs(self, info: Dict = None):
+        # Get obs with state_dict data
+        obs = super().get_obs(info)
+        # Get RGBD data from sensor
+        obs_sensor = self._get_obs_with_sensor_data(info)
+        sensor_rgbd = sensor_data_to_rgbd(obs_sensor, self._sensors, rgb=True, depth=True, segmentation=True)
+        # Get Pointcloud data from sensor
+        obs_sensor = self._get_obs_with_sensor_data(info)
+        sensor_point_cloud = sensor_data_to_pointcloud(obs_sensor, self._sensors)
+        # Add data to observation
+        obs['sensor_param'] = sensor_rgbd['sensor_param']
+        obs['sensor_data'] = sensor_rgbd['sensor_data']
+        obs['pointcloud'] = sensor_point_cloud['pointcloud']
+
+        return obs
+
 

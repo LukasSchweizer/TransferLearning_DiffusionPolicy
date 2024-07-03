@@ -201,8 +201,8 @@ def register_adapted_envs():
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--env-id", type=str, default="TurnFaucet-v1")
-    parser.add_argument("-o", "--obs-mode", type=str, default="state")
+    parser.add_argument("-e", "--env-id", type=str, default="AdaptedTurnFaucet-v1")
+    parser.add_argument("-o", "--obs-mode", type=str, default="state_dict")
     parser.add_argument("-r", "--robot-uid", type=str, default="panda", help="Robot setups supported are ['panda']")
     parser.add_argument("--object-id", type=str, default=None)
     parser.add_argument("--record-dir", type=str, default="../data")

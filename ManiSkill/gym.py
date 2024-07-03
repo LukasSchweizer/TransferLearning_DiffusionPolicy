@@ -22,14 +22,16 @@ def parse_args():
     parser.add_argument("-o", "--obs-mode", type=str, default="state")
     parser.add_argument("-r", "--robot-uid", type=str, default="panda", help="Robot setups supported are ['panda']")
     parser.add_argument("--object-id", type=str, default=None)
-    parser.add_argument("--record-dir", type=str, default="../data")
     args, opts = parser.parse_known_args()
 
     return args
 
 
+# Register Adapted Envs
 register_adapted_envs()
+# Parse command line arguments
 args = parse_args()
+# Create gym environment
 env = gym.make(
     args.env_id,
     num_envs=1,
@@ -37,9 +39,9 @@ env = gym.make(
     control_mode="pd_ee_delta_pose", # there is also "pd_joint_delta_pos", ...
     render_mode="human"
 )
+# Reset environment & run it
+obs, _ = env.reset(seed=0, options=dict(object_id=args.object_id))  # reset with a seed for determinism
 
-obs, _ = env.reset(seed=0, options=dict(object_id=args.object_id)) # reset with a seed for determinism
-print(obs['extra'].keys())
 done = False
 while not done:
     action = env.action_space.sample()
