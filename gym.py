@@ -6,6 +6,7 @@ import diffusion_policy
 import pickle
 import gzip
 import os
+import argparse
 import torch.nn as nn
 from models.base_models.vision_encoder import get_resnet, replace_bn_with_gn
 
@@ -19,13 +20,37 @@ from mani_skill.envs.tasks.tabletop import turn_faucet
 from mani_skill.agents.robots.panda.panda import Panda
 from mani_skill.utils import sapien_utils
 
+
+def register_adapted_envs():
+    # Register AdaptedTurnFaucetEnv
+    gym.envs.registration.register(
+        id='AdaptedTurnFaucet-v1',
+        entry_point='ManiSkill.data_collection.adapted_turn_faucet_env:AdaptedTurnFaucetEnv',
+        max_episode_steps=200,
+    )
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--env-id", type=str, default="AdaptedTurnFaucet-v1")
+    parser.add_argument("-o", "--obs-mode", type=str, default="state")
+    parser.add_argument("-r", "--robot-uid", type=str, default="panda", help="Robot setups supported are ['panda']")
+    parser.add_argument("--object-id", type=str, default=None)
+    args, opts = parser.parse_known_args()
+
+    return args
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# print(gym.envs.registry.keys())
+# Register Adapted Envs
+register_adapted_envs()
+# Parse command line arguments
+args = parse_args()
+# Create gym environment
 env = gym.make(
-    "TurnFaucet-v1", # there are more tasks e.g. "PushCube-v1", "PegInsertionSide-v1", ...
+    args.env_id,
     num_envs=1,
-    obs_mode="rgbd", # there is also "state_dict", "rgbd", ...
+    obs_mode="state_dict",
     control_mode="pd_joint_pos", # there is also "pd_joint_delta_pos", ...
     render_mode="human"
 )
@@ -99,7 +124,8 @@ ema_nets = nets
 ema_nets.load_state_dict(state_dict)
 ema_nets.to(device)
 
-obs, _ = env.reset(seed=0) # reset with a seed for determinism
+# Reset environment & run it
+obs, _ = env.reset(seed=0, options=dict(object_id=args.object_id))  # reset with a seed for determinism
 
 # keep a queue of last 2 steps of observations
 obs_deque = collections.deque(

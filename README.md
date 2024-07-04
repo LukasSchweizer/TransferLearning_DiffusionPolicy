@@ -32,8 +32,9 @@ You should now be in the activated conda environment, `dlproject`.
 **Starting with *TurnFaucet* and adding more later.**
 
 Collect Demonstrations via Keyboard Teleop
+Navigate in the ```/Maniskill/data_collection``` folder and run the following command from your command line:
 ```bash
-python -m mani_skill.examples.teleoperation.interactive_panda -e "TurnFaucet-v1" 
+python teleop.py --env-id="AdaptedTurnFaucet-v1" --object-id="5001"
 ```
 
 ### 2. Train Diffusion Policy
