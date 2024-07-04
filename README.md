@@ -46,7 +46,7 @@ python train.py
 ```bash
 # TODO: Add diffusion policy
 cd ManiSkill
-python gym.py "TurnFaucet-v1"
+python gym.py "AdaptedTurnFaucet-v1" --object-id="5001"
 ```
 
 ### 4. Figure out how to transfer the policy to another action (5 more actions???)
