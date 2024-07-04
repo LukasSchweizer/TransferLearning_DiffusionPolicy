@@ -26,7 +26,7 @@ env = gym.make(
     "TurnFaucet-v1", # there are more tasks e.g. "PushCube-v1", "PegInsertionSide-v1", ...
     num_envs=1,
     obs_mode="rgbd", # there is also "state_dict", "rgbd", ...
-    control_mode="pd_ee_delta_pose", # there is also "pd_joint_delta_pos", ...
+    control_mode="pd_joint_pos", # there is also "pd_joint_delta_pos", ...
     render_mode="human"
 )
 
@@ -54,14 +54,6 @@ action_horizon = 8
 #|o|o|                             observations: 2
 #| |a|a|a|a|a|a|a|a|               actions executed: 8
 #|p|p|p|p|p|p|p|p|p|p|p|p|p|p|p|p| actions predicted: 16
-
-# ResNet18 has output dim of 512
-vision_feature_dim = 512
-# agent_pos is 2 dimensional
-lowdim_obs_dim = 18
-# observation feature has 514 dims in total per step
-obs_dim = vision_feature_dim + lowdim_obs_dim
-action_dim = 8
 
 num_diffusion_iters = 100
 noise_scheduler = DDPMScheduler(
@@ -195,5 +187,5 @@ while not done:
         obs_deque.append(obs)
         # and reward/vis
         rewards.append(reward)
-    env.render()  # a display is required to render
+        env.render()  # a display is required to render
 env.close()
