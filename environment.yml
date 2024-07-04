@@ -10,3 +10,6 @@ dependencies:
       - torchaudio==2.3.0
       - torchvision==0.18.0
       - numpy==1.26.4
+      - zarr==2.12.0
+      - diffusers==0.18.2
+      - numcodecs==0.10.2

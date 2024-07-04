@@ -5,13 +5,25 @@ Repository for the "Deep Learning Lab" offered by the University Freiburg. This 
 With Miniconda installed on your machine, execute the setup script:
 ```bash
 # Allow file execution
-chmod +x dlproject_conda_env
+chmod +x conda_env_setup.sh
 
 # Execute setup script
 ./conda_env_setup.sh
 
 # Collect Faucet Assets
 python -m mani_skill.utils.download_asset partnet_mobility_faucet
+
+# Install Real-Standford Diffusion Policy (RGD/State)
+cd ..
+git clone https://github.com/real-stanford/diffusion_policy.git && cd diffusion_policy
+pip install -e ../diffusion_policy
+
+# Install 3D Diffusion Policy (Point Cloud)
+cd ..
+git clone https://github.com/YanjieZe/3D-Diffusion-Policy.git && cd 3D-Diffusion-Policy
+cd 3D-Diffusion-Policy
+pip install -e .
+cd ../../TransferLearning_DiffusionPolicy
 ```
 You should now be in the activated conda environment, `dlproject`.
 
@@ -25,8 +37,8 @@ python -m mani_skill.examples.teleoperation.interactive_panda -e "TurnFaucet-v1"
 ```
 
 ### 2. Train Diffusion Policy
-```python
-# TODO
+```bash
+python train.py
 ```
 
 ### 3. Run "TurnFaucet-v1" as controlled the trained diffusion policy
