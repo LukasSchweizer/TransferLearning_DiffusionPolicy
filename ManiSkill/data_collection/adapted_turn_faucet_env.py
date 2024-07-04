@@ -1,22 +1,16 @@
-from typing import Dict, List, Union
+from typing import Dict, List
 
 import numpy as np
-import sapien
-import sapien.physx as physx
 import torch
 
 from mani_skill.envs.tasks.tabletop.turn_faucet import TurnFaucetEnv
 from mani_skill.sensors import CameraConfig
-from mani_skill.utils.registration import register_env
-from mani_skill.envs.utils import randomization
-from mani_skill.utils import common, io_utils, sapien_utils
-from mani_skill.utils.building import actors, articulations
+from mani_skill.utils import common, sapien_utils
+from mani_skill.utils.building import articulations
 from mani_skill.utils.registration import register_env
 from mani_skill.utils.scene_builder.table.scene_builder import TableSceneBuilder
-from mani_skill.utils.structs import RenderCamera
 from mani_skill.utils.structs.articulation import Articulation
 from mani_skill.utils.structs.link import Link
-from mani_skill.utils.structs.pose import Pose
 from mani_skill.envs.utils.observations import (
     sensor_data_to_pointcloud,
     sensor_data_to_rgbd,
