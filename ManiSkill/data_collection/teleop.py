@@ -14,9 +14,12 @@ import mani_skill.trajectory.utils as trajectory_utils
 from mani_skill.utils import sapien_utils
 from mani_skill.utils.wrappers.record import RecordEpisode
 
+from datetime import datetime
 
 def main(args):
     output_dir = f"{args.record_dir}/{args.env_id}/teleop/"
+    trajectory_name = (f"trajectory_{args.object_id if args.object_id is not None else ''}_"
+                       f"{datetime.now().strftime('%d%m%Y%H%M%S')}")
     env = gym.make(
         args.env_id,
         obs_mode=args.obs_mode,
@@ -28,7 +31,7 @@ def main(args):
     env = RecordEpisode(
         env,
         output_dir=output_dir,
-        trajectory_name="trajectory",
+        trajectory_name=trajectory_name,
         save_video=False,
         info_on_video=False,
         source_type="teleoperation",
@@ -71,7 +74,7 @@ def main(args):
     env = RecordEpisode(
         env,
         output_dir=output_dir,
-        trajectory_name="trajectory",
+        trajectory_name=trajectory_name,
         save_video=True,
         info_on_video=False,
         save_trajectory=False,
