@@ -4,10 +4,11 @@ import zarr
 import h5py
 import numpy as np
 from torch.utils.data import Dataset
+import torch
 from tqdm import tqdm
 
-from mani_skill.utils import common
-from mani_skill.utils.io_utils import load_json
+from mani_skill2.utils import common
+from mani_skill2.utils.io_utils import load_json
 from utils.replay_buffer import RobotReplayBuffer
 
 
@@ -20,6 +21,7 @@ def load_h5_data(data):
         else:
             out[k] = load_h5_data(data[k])
     return out
+
 
 class ManiSkillTrajectoryDataset(Dataset):
     """
@@ -57,26 +59,22 @@ class ManiSkillTrajectoryDataset(Dataset):
             load_count = len(self.episodes)
         for eps_id in tqdm(range(load_count)):
             eps = self.episodes[eps_id]
-            if success_only:
-                assert (
-                    "success" in eps
-                ), "episodes in this dataset do not have the success attribute, cannot load dataset with success_only=True"
-                if not eps["success"]:
-                    continue
+            # if success_only:
+            #     assert (
+            #         "success" in eps
+            #     ), "episodes in this dataset do not have the success attribute, cannot load dataset with success_only=True"
+            #     if not eps["success"]:
+            #         continue
             trajectory = self.data[f"traj_{eps['episode_id']}"]
             trajectory = load_h5_data(trajectory)
             eps_len = len(trajectory["actions"])
 
             # exclude the final observation as most learning workflows do not use it
-            obs = common.index_dict_array(trajectory["obs"], slice(eps_len))
-            if eps_id == 0:
-                self.obs = obs
-            else:
-                self.obs = common.append_dict_array(self.obs, obs)
+            obs = trajectory["obs"]
 
             self.actions.append(trajectory["actions"])
-            self.terminated.append(trajectory["terminated"])
-            self.truncated.append(trajectory["truncated"])
+            # self.terminated.append(trajectory["terminated"])
+            # self.truncated.append(trajectory["truncated"])
 
             # handle data that might optionally be in the trajectory
             if "rewards" in trajectory:
@@ -96,50 +94,11 @@ class ManiSkillTrajectoryDataset(Dataset):
                     self.fail.append(trajectory["fail"])
             self.generate_zarr(obs, trajectory["actions"])
 
-        self.actions = np.vstack(self.actions)
-        self.terminated = np.concatenate(self.terminated)
-        self.truncated = np.concatenate(self.truncated)
-
-        if self.rewards is not None:
-            self.rewards = np.concatenate(self.rewards)
-        if self.success is not None:
-            self.success = np.concatenate(self.success)
-        if self.fail is not None:
-            self.fail = np.concatenate(self.fail)
-
-        def remove_np_uint16(x: Union[np.ndarray, dict]):
-            if isinstance(x, dict):
-                for k in x.keys():
-                    x[k] = remove_np_uint16(x[k])
-                return x
-            else:
-                if x.dtype == np.uint16:
-                    return x.astype(np.int32)
-                return x
-
-        # uint16 dtype is used to conserve disk space and memory
-        # you can optimize this dataset code to keep it as uint16 and process that
-        # dtype of data yourself. for simplicity we simply cast to a int32 so
-        # it can automatically be converted to torch tensors without complaint
-        self.obs = remove_np_uint16(self.obs)
-
-        if device is not None:
-            self.actions = common.to_tensor(self.actions, device=device)
-            self.obs = common.to_tensor(self.obs, device=device)
-            self.terminated = common.to_tensor(self.terminated, device=device)
-            self.truncated = common.to_tensor(self.truncated, device=device)
-            if self.rewards is not None:
-                self.rewards = common.to_tensor(self.rewards, device=device)
-            if self.success is not None:
-                self.success = common.to_tensor(self.terminated, device=device)
-            if self.fail is not None:
-                self.fail = common.to_tensor(self.truncated, device=device)
-
     def __len__(self):
         return len(self.actions)
 
     def __getitem__(self, idx):
-        action = common.to_tensor(self.actions[idx], device=self.device)
+        action = self.actions[idx]
         obs = common.index_dict_array(self.obs, idx, inplace=False)
 
         res = dict(
@@ -155,17 +114,15 @@ class ManiSkillTrajectoryDataset(Dataset):
         if self.fail is not None:
             res.update(fail=self.fail[idx])
         return res
-    
 
     def generate_zarr(self, obs, actions):
         data_dict = list()
         for i in range(len(actions)):
             data_dict.append({
-                                "img" : obs["sensor_data"]["base_camera"]["rgb"][i].astype(np.float32),
+                                "img" : obs['image']['base_camera']['rgb'][i].astype(np.float32),
                                 "state": np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
                                 "action": actions[i].astype(np.float32),
                             })
-        print("Saving additional episode...")
         self.replay_buffer.add_episode_from_list(data_dict, compressors="disk")
         
         

@@ -8,6 +8,8 @@ import gzip
 import os
 import argparse
 import torch.nn as nn
+import mani_skill2.utils.sapien_utils as utils
+import mani_skill2.envs
 from models.base_models.vision_encoder import get_resnet, replace_bn_with_gn
 
 from models.base_models.ConditionalUnet1D import ConditionalUnet1D
@@ -16,24 +18,23 @@ from diffusers.training_utils import EMAModel
 from diffusers.optimization import get_scheduler
 from tqdm.auto import tqdm
 from models.datasets.image_dataset import normalize_data, unnormalize_data
-from mani_skill.envs.tasks.tabletop import turn_faucet
-from mani_skill.agents.robots.panda.panda import Panda
-from mani_skill.utils import sapien_utils
+from mani_skill2.agents.robots.panda import Panda
 
+# from mani_skill2.envs.tasks.tabletop import TurnFaucetEnv
 
-def register_adapted_envs():
-    # Register AdaptedTurnFaucetEnv
-    gym.envs.registration.register(
-        id='AdaptedTurnFaucet-v1',
-        entry_point='ManiSkill.data_collection.adapted_turn_faucet_env:AdaptedTurnFaucetEnv',
-        max_episode_steps=200,
-    )
+# def register_adapted_envs():
+#     # Register AdaptedTurnFaucetEnv
+#     gym.envs.registration.register(
+#         id='AdaptedTurnFaucet-v1',
+#         entry_point='ManiSkill.data_collection.adapted_turn_faucet_env:AdaptedTurnFaucetEnv',
+#         max_episode_steps=200,
+#     )
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--env-id", type=str, default="AdaptedTurnFaucet-v1")
-    parser.add_argument("-o", "--obs-mode", type=str, default="state")
+    parser.add_argument("-e", "--env-id", type=str, default="TurnFaucet-v0")
+    parser.add_argument("-o", "--obs-mode", type=str, default="rgbd")
     parser.add_argument("-r", "--robot-uid", type=str, default="panda", help="Robot setups supported are ['panda']")
     parser.add_argument("--object-id", type=str, default=None)
     args, opts = parser.parse_known_args()
@@ -42,36 +43,27 @@ def parse_args():
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# Register Adapted Envs
-register_adapted_envs()
+# # Register Adapted Envs
+# register_adapted_envs()
 # Parse command line arguments
 args = parse_args()
 # Create gym environment
 env = gym.make(
     args.env_id,
-    num_envs=1,
-    obs_mode="state_dict",
+    # num_envs=1,
+    obs_mode="rgbd",
     control_mode="pd_joint_pos", # there is also "pd_joint_delta_pos", ...
     render_mode="human"
 )
 
-ckpt_path = "models/checkpoints/ema_nets_2024-07-03_17-29-11.pth"
+ckpt_path = "models/checkpoints/ema_nets_2024-07-08_17-56-29.pth"
 
-# print("... read data")
-# path = "demos/TurnFaucet-v1/teleop"
-# data_file = os.path.join(path, 'stats.pkl.gzip')
-# f = gzip.open(data_file,'rb')   
-# stats = pickle.load(f)
-stats = {'agent_pos': {'min': np.array([ -0.10577843,   0.3547971 ,  -1.2683613 ,  -2.2733126 ,
-        -1.4123508 ,   1.0088959 ,   0.6288785 ,   0.        ,
-         0.        ,  -6.311095  ,  -8.939884  , -12.6822195 ,
-        -4.5662527 ,  -0.64343923,  -0.4681055 ,  -5.04203   ,
-        -0.37207416,  -0.92385817]), 'max': np.array([ 1.2166927 ,  1.7075498 ,  0.18482645, -1.046408  ,  0.07739243,
-        2.7382288 ,  1.6735568 ,  0.04      ,  0.04      ,  7.989044  ,
-       27.78688   ,  8.383817  ,  0.59344363, 13.806152  , 13.334647  ,
-        1.8540776 ,  0.34556276,  0.1677819 ])}, 'action': {'min': np.array([-0.10539514,  0.35527095, -0.9080588 , -2.3074772 , -1.229607  ,
-        1.6681567 ,  0.62947667, -1.        ]), 'max': np.array([ 0.8341085 ,  1.0594723 ,  0.1329492 , -1.0431573 ,  0.07162452,
-        2.738534  ,  1.6747898 ,  1.        ])}}
+print("... read data")
+path = "demos/TurnFaucet-v0"
+data_file = os.path.join(path, 'stats.gzip')
+f = gzip.open(data_file,'rb')
+stats = pickle.load(f)
+
 # parameters
 pred_horizon = 16
 obs_horizon = 2
@@ -125,7 +117,7 @@ ema_nets.load_state_dict(state_dict)
 ema_nets.to(device)
 
 # Reset environment & run it
-obs, _ = env.reset(seed=0, options=dict(object_id=args.object_id))  # reset with a seed for determinism
+obs, _ = env.reset(seed=0, options=dict(model_id=args.object_id))  # reset with a seed for determinism
 
 # keep a queue of last 2 steps of observations
 obs_deque = collections.deque(
@@ -141,7 +133,7 @@ while not done:
     B = 1
     # stack the last obs_horizon number of observations
 
-    images = np.stack([x["sensor_data"]["base_camera"]["rgb"] for x in obs_deque])
+    images = np.stack([x["image"]["base_camera"]["rgb"] for x in obs_deque])
     agent_poses = np.stack([np.concatenate((x["agent"]["qpos"], x["agent"]["qvel"])).flatten() for x in obs_deque])
     print(agent_poses)
 

@@ -11,7 +11,7 @@ chmod +x conda_env_setup.sh
 ./conda_env_setup.sh
 
 # Collect Faucet Assets
-python -m mani_skill.utils.download_asset partnet_mobility_faucet
+python -m mani_skill2.utils.download_asset partnet_mobility_faucet
 
 # Install Real-Standford Diffusion Policy (RGD/State)
 cd ..
@@ -34,7 +34,7 @@ You should now be in the activated conda environment, `dlproject`.
 Collect Demonstrations via Keyboard Teleop
 Navigate in the ```/Maniskill/data_collection``` folder and run the following command from your command line:
 ```bash
-python teleop.py --env-id="AdaptedTurnFaucet-v1" --object-id="5001"
+python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "rgbd"
 ```
 
 ### 2. Train Diffusion Policy
@@ -42,11 +42,9 @@ python teleop.py --env-id="AdaptedTurnFaucet-v1" --object-id="5001"
 python train.py
 ```
 
-### 3. Run "TurnFaucet-v1" as controlled the trained diffusion policy
+### 3. Run "TurnFaucet-v0" as controlled the trained diffusion policy
 ```bash
-# TODO: Add diffusion policy
-cd ManiSkill
-python gym.py "AdaptedTurnFaucet-v1" --object-id="5001"
+python gym.py --object-id="5001"
 ```
 
 ### 4. Figure out how to transfer the policy to another action (5 more actions???)

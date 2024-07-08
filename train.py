@@ -10,6 +10,7 @@ import gzip
 import numpy as np
 import os
 import diffusion_policy
+import json
 
 from datetime import datetime
 from models.base_models.ConditionalUnet1D import ConditionalUnet1D
@@ -22,11 +23,11 @@ from models.base_models.vision_encoder import get_resnet, replace_bn_with_gn
 from models.datasets.maniskill_dataset import ManiSkillTrajectoryDataset
 
 # TODO: add main function with arguments
-digest_trajectory_data = False
+digest_trajectory_data = True
 
 # download demonstration data from Google Drive
-dataset_path = "demos/TurnFaucet-v1/teleop/trajectory.h5"
-zarr_path = "demos/TurnFaucet-v1/teleop/trajectory.zarr"
+dataset_path = "demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos.h5"
+zarr_path = "demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos.zarr"
 
 if digest_trajectory_data:
     trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=-1, success_only=True, device=None, zarr_path=zarr_path)
@@ -46,14 +47,19 @@ dataset = ImageDataset(
     obs_horizon=obs_horizon,
     action_horizon=action_horizon
 )
-# save training data statistics (min, max) for each dim
+
 stats = dataset.stats
-print("saving stats data...")
-path = "demos/TurnFaucet-v1/teleop"
-data_file = os.path.join(path, 'stats.pkl.gzip')       
-f = gzip.open(data_file,'wb')
-pickle.dump(stats, f)
-print("Stats data saved!")
+
+if digest_trajectory_data:
+    #save training data statistics (min, max) for each dim
+    print("Saving stats data...")
+    path = "demos/TurnFaucet-v0"
+    data_file = os.path.join(path, 'stats.gzip')       
+    f = gzip.open(data_file,'wb')
+    pickle.dump(stats, f)
+    f.close()
+    print("Stats data saved!")
+    print(stats)
 
 # create dataloader
 dataloader = torch.utils.data.DataLoader(
