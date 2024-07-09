@@ -16,6 +16,7 @@ from mani_skill.utils.wrappers.record import RecordEpisode
 
 from datetime import datetime
 
+
 def main(args):
     output_dir = f"{args.record_dir}/{args.env_id}/teleop/"
     trajectory_name = (f"trajectory_{args.object_id if args.object_id is not None else ''}_"
@@ -93,7 +94,6 @@ def main(args):
     trajectory_data.close()
     env.close()
     del env
-
 
 
 def solve(env: BaseEnv, debug=False, vis=False):

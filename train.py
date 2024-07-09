@@ -22,11 +22,11 @@ from models.base_models.vision_encoder import get_resnet, replace_bn_with_gn
 from models.datasets.maniskill_dataset import ManiSkillTrajectoryDataset
 
 # TODO: add main function with arguments
-digest_trajectory_data = False
+digest_trajectory_data = True
 
 # download demonstration data from Google Drive
-dataset_path = "demos/TurnFaucet-v1/teleop/trajectory.h5"
-zarr_path = "demos/TurnFaucet-v1/teleop/trajectory.zarr"
+dataset_path = "ManiSkill/data/AdaptedTurnFaucet-v1/teleop/trajectory_5002_06072024214831.h5"
+zarr_path = "ManiSkill/data/AdaptedTurnFaucet-v1/teleop/trajectory_5002_06072024214831.zarr"
 
 if digest_trajectory_data:
     trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=-1, success_only=True, device=None, zarr_path=zarr_path)
@@ -49,7 +49,7 @@ dataset = ImageDataset(
 # save training data statistics (min, max) for each dim
 stats = dataset.stats
 print("saving stats data...")
-path = "demos/TurnFaucet-v1/teleop"
+path = "ManiSkill/data/AdaptedTurnFaucet-v1/teleop"
 data_file = os.path.join(path, 'stats.pkl.gzip')       
 f = gzip.open(data_file,'wb')
 pickle.dump(stats, f)

@@ -1,24 +1,15 @@
-import gymnasium as gym
+import argparse
 import collections
+
+import gymnasium as gym
 import numpy as np
 import torch
-import diffusion_policy
-import pickle
-import gzip
-import os
-import argparse
 import torch.nn as nn
-from models.base_models.vision_encoder import get_resnet, replace_bn_with_gn
+from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
 
 from models.base_models.ConditionalUnet1D import ConditionalUnet1D
-from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
-from diffusers.training_utils import EMAModel
-from diffusers.optimization import get_scheduler
-from tqdm.auto import tqdm
+from models.base_models.vision_encoder import get_resnet, replace_bn_with_gn
 from models.datasets.image_dataset import normalize_data, unnormalize_data
-from mani_skill.envs.tasks.tabletop import turn_faucet
-from mani_skill.agents.robots.panda.panda import Panda
-from mani_skill.utils import sapien_utils
 
 
 def register_adapted_envs():
@@ -55,7 +46,7 @@ env = gym.make(
     render_mode="human"
 )
 
-ckpt_path = "models/checkpoints/ema_nets_2024-07-03_17-29-11.pth"
+ckpt_path = "models/checkpoints/ema_nets_2024-07-07_12-41-36.pth"
 
 # print("... read data")
 # path = "demos/TurnFaucet-v1/teleop"
@@ -132,7 +123,6 @@ obs_deque = collections.deque(
     [obs] * obs_horizon, maxlen=obs_horizon)
 # save visualization and rewards
 rewards = list()
-done = False
 step_idx = 0
 
 print(obs['extra'].keys())
@@ -201,7 +191,7 @@ while not done:
     # only take action_horizon number of actions
     start = obs_horizon - 1
     end = start + action_horizon
-    action = action_pred[start:end,:]
+    action = action_pred[start:end, :]
     # (action_horizon, action_dim)
 
     # execute action_horizon number of steps

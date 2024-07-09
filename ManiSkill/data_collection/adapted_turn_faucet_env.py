@@ -17,7 +17,7 @@ from mani_skill.envs.utils.observations import (
 )
 
 
-@register_env("AdaptedTurnFaucet-v1", max_episode_steps=200)
+@register_env("AdaptedTurnFaucet-v1", max_episode_steps=500)
 class AdaptedTurnFaucetEnv(TurnFaucetEnv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
