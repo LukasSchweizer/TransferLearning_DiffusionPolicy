@@ -23,7 +23,16 @@ cd ..
 git clone https://github.com/YanjieZe/3D-Diffusion-Policy.git && cd 3D-Diffusion-Policy
 cd 3D-Diffusion-Policy
 pip install -e .
+
+#Install pointcloud visualizer adn pytorch3d
+cd ../visualizer
+pip install -e .
+cd ../pytorch3d_simplified
+pip install -e .
 cd ../../TransferLearning_DiffusionPolicy
+
+
+
 ```
 You should now be in the activated conda environment, `dlproject`.
 

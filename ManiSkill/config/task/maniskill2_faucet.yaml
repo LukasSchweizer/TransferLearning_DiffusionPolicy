@@ -1,0 +1,27 @@
+name: TurnFaucet-v0
+
+task_name: TurnFaucet-v0
+
+shape_meta: &shape_meta
+  # acceptable types: rgb, low_dim
+  obs:
+    point_cloud:
+      shape: [32768, 3]
+      type: point_cloud
+    agent_pos:
+      shape: [18]
+      type: low_dimx
+  action:
+    shape: [8]
+
+env_runner: null
+
+dataset:
+  _target_: models.datasets.maniskill_pointcloud_dataset.ManiskillDataset
+  zarr_path: demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.zarr
+  horizon: ${horizon}
+  pad_before: ${eval:'${n_obs_steps}-1'}
+  pad_after: ${eval:'${n_action_steps}-1'}
+  seed: 42
+  val_ratio: 0.02
+  max_train_episodes: 90

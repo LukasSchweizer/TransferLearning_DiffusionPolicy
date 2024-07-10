@@ -27,7 +27,7 @@ digest_trajectory_data = False
 
 # download demonstration data from Google Drive
 dataset_path = "demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos.h5"
-zarr_path = "demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos_hand_cam.zarr"
+zarr_path = "demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos.zarr"
 
 if digest_trajectory_data:
     trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=-1, success_only=True, device=None, zarr_path=zarr_path)
