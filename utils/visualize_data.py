@@ -37,7 +37,7 @@ if __name__ == "__main__":
     
     ##############################
     # Set the data location here
-    data = 'demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos.zarr/data/img'
+    data = 'demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos_hoopla.zarr/data/img'
     ##############################
 
     read_data(data)

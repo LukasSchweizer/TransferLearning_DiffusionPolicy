@@ -56,7 +56,7 @@ env = gym.make(
     render_mode="human"
 )
 
-ckpt_path = "models/checkpoints/ema_nets_2024-07-08_17-56-29.pth"
+ckpt_path = "models/checkpoints/ema_nets_2024-07-09_17-14-43.pth"
 
 print("... read data")
 path = "demos/TurnFaucet-v0"
@@ -133,7 +133,7 @@ while not done:
     B = 1
     # stack the last obs_horizon number of observations
 
-    images = np.stack([x["image"]["base_camera"]["rgb"] for x in obs_deque])
+    images = np.stack([x["image"]["hand_camera"]["rgb"] for x in obs_deque])
     agent_poses = np.stack([np.concatenate((x["agent"]["qpos"], x["agent"]["qvel"])).flatten() for x in obs_deque])
     print(agent_poses)
 

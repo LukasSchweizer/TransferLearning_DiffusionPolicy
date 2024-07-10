@@ -119,7 +119,7 @@ class ManiSkillTrajectoryDataset(Dataset):
         data_dict = list()
         for i in range(len(actions)):
             data_dict.append({
-                                "img" : obs['image']['base_camera']['rgb'][i].astype(np.float32),
+                                "img" : obs['image']['hand_camera']['rgb'][i].astype(np.float32),
                                 "state": np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
                                 "action": actions[i].astype(np.float32),
                             })
