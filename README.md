@@ -38,22 +38,38 @@ You should now be in the activated conda environment, `dlproject`.
 
 ## Workflow: 
 ### 1. Collecting Demos
-**Starting with *TurnFaucet* and adding more later.**
+(*Starting with *TurnFaucet* and adding more later.*)
 
-Collect Demonstrations via Keyboard Teleop
-Navigate in the ```/Maniskill/data_collection``` folder and run the following command from your command line:
+#### **Collect Demonstrations via Keyboard Teleop**
 ```bash
+python ManiSkill/data_collection/teleop.py -e "TurnFaucet-v0"
+```
+
+#### **Collect Demonstrations via Prerecorded Trajectories**
+```bash
+# Save RGB
 python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "rgbd"
+
+# Save PointCloud
+python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "pointcloud"
 ```
 
 ### 2. Train Diffusion Policy
 ```bash
+# 2D Diffusion
 python train.py
+
+# 3D Diffusion
+bash train_3dp.sh dp3 maniskill2_faucet 0322 0 0
 ```
 
 ### 3. Run "TurnFaucet-v0" as controlled the trained diffusion policy
 ```bash
-python gym.py --object-id="5001"
+# 2D Diffusion
+python gym.py --object-id="5000"
+
+# 3D Diffusion
+bash eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 ```
 
 ### 4. Figure out how to transfer the policy to another action (5 more actions???)
