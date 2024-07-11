@@ -117,6 +117,7 @@ class ManiSkillTrajectoryDataset(Dataset):
 
     def generate_zarr(self, obs, actions):
         data_dict = list()
+        #print(obs["pointcloud"]["xyzw"].shape)
         for i in range(len(actions)):
             data_dict.append({
                                 #"img" : obs['image']['hand_camera']['rgb'][i].astype(np.float32),
