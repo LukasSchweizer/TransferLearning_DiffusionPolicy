@@ -9,6 +9,8 @@ __pycache__/
 # data
 data/
 
+imgui.ini
+
 # Distribution / packaging
 .Python
 build/
