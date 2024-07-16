@@ -59,7 +59,7 @@ env = gym.make(
 ckpt_path = "models/checkpoints/ema_nets_2024-07-09_17-14-43.pth"
 
 print("... read data")
-path = "demos/TurnFaucet-v0"
+path = "demos/rigid_body/TurnFaucet-v0"
 data_file = os.path.join(path, 'stats.gzip')
 f = gzip.open(data_file,'rb')
 stats = pickle.load(f)

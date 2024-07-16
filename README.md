@@ -27,12 +27,10 @@ pip install -e .
 #Install pointcloud visualizer adn pytorch3d
 cd ../visualizer
 pip install -e .
-cd ../pytorch3d_simplified
-pip install -e .
 cd ../../TransferLearning_DiffusionPolicy
 
-
-
+# Install pytorch3d
+pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
 ```
 You should now be in the activated conda environment, `dlproject`.
 
@@ -43,6 +41,19 @@ You should now be in the activated conda environment, `dlproject`.
 #### **Collect Demonstrations via Keyboard Teleop**
 ```bash
 python ManiSkill/data_collection/teleop.py -e "TurnFaucet-v0"
+```
+
+#### **Download Demonstrations**
+```bash
+# Download all rigid-body demonstrations (TODO: Download only necessary demos)
+gdown https://drive.google.com/drive/folders/1pd9Njg2sOR1VSSmp-c1mT7zCgJEnF8r7 --folder -O demos/
+```
+After downloading you have to unzip it into the demos folder
+
+#### **Create .zarr from Demonstrations**
+```bash
+# Adapt file paths in train.py and run it
+python train.py
 ```
 
 #### **Collect Demonstrations via Prerecorded Trajectories**
