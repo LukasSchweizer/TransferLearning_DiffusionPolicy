@@ -61,8 +61,10 @@ python train.py
 # Save RGB
 python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "rgbd"
 
-# Save PointCloud
+# Save PointCloud (only pointcloud)
 python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "pointcloud"
+# with Segmentation
+python -m ManiSkill.data_collection.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "pointcloud"
 ```
 
 ### 2. Train Diffusion Policy

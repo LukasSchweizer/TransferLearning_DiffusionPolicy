@@ -1,6 +1,7 @@
 import argparse
 import gymnasium as gym
 from data_collection.debug import plot_rgb
+import mani_skill2.envs
 
 
 def register_adapted_envs():
