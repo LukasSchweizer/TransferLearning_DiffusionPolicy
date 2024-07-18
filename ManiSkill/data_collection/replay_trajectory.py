@@ -109,6 +109,7 @@ def _main(args, proc_id: int = 0, num_procs=1, pbar=None):
     ] = "rgb_array"  # note this only affects the videos saved as RecordEpisode wrapper calls env.render
 
     # ADDS SEGMENTATION TO OBSERVATION
+    # env_kwargs["enable_gt_seg"] = True  # (NOT WORKING)
     env_kwargs["camera_cfgs"] = {"add_segmentation": True, "use_stereo_depth": False}
 
     env = gym.make(env_id, **env_kwargs)
@@ -193,7 +194,21 @@ def _main(args, proc_id: int = 0, num_procs=1, pbar=None):
                 for t, a in enumerate(ori_actions):
                     if pbar is not None:
                         pbar.update()
-                    _, _, _, _, info = env.step(a)
+                    obs, _, _, _, info = env.step(a)
+                    #print(env.get_actors())
+                    #print(obs["pointcloud"].keys())
+                    #pointcloud = obs["pointcloud"]["xyzw"]
+                    #segmentation = obs["pointcloud"]["Segmentation"]
+                    #for col in range(segmentation.shape[1]):
+                    #    print(f"Column {col} unique values: {np.unique(segmentation[:, col])}")
+                    #from ManiSkill.data_collection.debug import plot_point_cloud
+                    #from utils.filter_pointcloud import filter_pointcloud_by_segmentation
+                    #obs = filter_pointcloud_by_segmentation(pointcloud, segmentation, [14])
+                    #print(obs.shape)
+                    #plot_point_cloud(obs)
+                    #print(obs["pointcloud"]["xyzw"][-1])
+                    #print(obs["pointcloud"]["Segmentation"][-1])
+                    #quit()
                     if args.vis:
                         env.render_human()
                     if args.use_env_states:

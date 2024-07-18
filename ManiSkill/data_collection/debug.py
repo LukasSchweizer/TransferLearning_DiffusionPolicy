@@ -8,7 +8,7 @@ from PIL import Image
 def plot_point_cloud(obs):
     fig = plt.figure(figsize=(12, 7))
     ax = fig.add_subplot(111, projection='3d')
-    tensor = obs["pointcloud"]["xyzw"][0]
+    tensor = obs  # ["pointcloud"]["xyzw"]
     x = tensor[:, 0]
     y = tensor[:, 1]
     z = tensor[:, 2]

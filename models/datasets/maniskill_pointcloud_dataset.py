@@ -8,6 +8,7 @@ from diffusion_policy_3d.common.sampler import (
     SequenceSampler, get_val_mask, downsample_mask)
 from diffusion_policy_3d.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
 from diffusion_policy_3d.dataset.base_dataset import BaseDataset
+from utils.filter_pointcloud import filter_pointcloud_by_segmentation
 
 class ManiskillDataset(BaseDataset):
     def __init__(self,

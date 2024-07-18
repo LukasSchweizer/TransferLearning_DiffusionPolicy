@@ -10,6 +10,7 @@ from tqdm import tqdm
 from mani_skill2.utils import common
 from mani_skill2.utils.io_utils import load_json
 from utils.replay_buffer import RobotReplayBuffer
+from utils.filter_pointcloud import filter_pointcloud_by_segmentation, downsample_point_clouds
 
 
 # loads h5 data into memory for faster access
@@ -117,15 +118,32 @@ class ManiSkillTrajectoryDataset(Dataset):
 
     def generate_zarr(self, obs, actions):
         data_dict = list()
-        #print(obs["pointcloud"]["xyzw"].shape)
         for i in range(len(actions)):
+            pointcloud = obs["pointcloud"]["xyzw"][i].astype(np.float32)
+            rgb = obs["pointcloud"]["rgb"][i].astype(np.float32)
+            segmentation = obs["pointcloud"]["Segmentation"][i].astype(np.int8)
+            # Remove floor from data (ENSURE ID 14 is FLOOR), this can be done by calling env.get_actors()
+            segmented_pointcloud = filter_pointcloud_by_segmentation(pointcloud, segmentation, [14])
+            segmented_rgb = filter_pointcloud_by_segmentation(rgb, segmentation, [14])
+
+            # Uniformly sample points from pointcloud to ensure equal size
+            num_points = 4096
+            segmented_pointcloud, segmented_rgb = downsample_point_clouds([segmented_pointcloud, segmented_rgb], num_points)
+
             data_dict.append({
-                                #"img" : obs['image']['hand_camera']['rgb'][i].astype(np.float32),
-                                "pointcloud": obs["pointcloud"]["xyzw"][i].astype(np.float32),
-                                "rgb": obs["pointcloud"]["rgb"][i].astype(np.float32),
-                                "state": np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
-                                "action": actions[i].astype(np.float32),
-                            })
+                "pointcloud": segmented_pointcloud,
+                "rgb": segmented_rgb,
+                "state": np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
+                "action": actions[i].astype(np.float32),
+            })
+            #data_dict.append({
+            #                    #"img" : obs['image']['hand_camera']['rgb'][i].astype(np.float32),
+            #                    "pointcloud": obs["pointcloud"]["xyzw"][i].astype(np.float32),
+            #                    "segmentation": obs["pointcloud"]["Segmentation"][i].astype(np.float32),
+            #                    "rgb": obs["pointcloud"]["rgb"][i].astype(np.float32),
+            #                    "state": np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
+            #                    "action": actions[i].astype(np.float32),
+            #                })
         self.replay_buffer.add_episode_from_list(data_dict, compressors="disk")
         
         
