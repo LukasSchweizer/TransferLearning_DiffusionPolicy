@@ -18,7 +18,7 @@ import mani_skill2.envs
 class ManiSkill2Runner(BaseRunner):
     def __init__(self,
                  output_dir,
-                 eval_episodes=20,
+                 eval_episodes=10,
                  max_steps=200,
                  n_obs_steps=8,
                  n_action_steps=8,
@@ -50,7 +50,8 @@ class ManiSkill2Runner(BaseRunner):
             self.task_name,
             obs_mode="pointcloud",
             control_mode="pd_joint_pos", 
-            render_mode="human")
+            render_mode="human"
+            )
 
         self.fps = fps
         self.crf = crf
@@ -69,6 +70,7 @@ class ManiSkill2Runner(BaseRunner):
 
         all_goal_achieved = []
         all_success_rates = []
+        rewards = []
 
         for episode_idx in tqdm.tqdm(range(self.eval_episodes), desc=f"Eval in Maniskill2 {self.task_name} Pointcloud Env",
                                      leave=False, mininterval=self.tqdm_interval_sec):
@@ -81,7 +83,6 @@ class ManiSkill2Runner(BaseRunner):
             obs_deque = collections.deque(
                 [obs] * self.n_obs_steps, maxlen=self.n_obs_steps)
 
-            rewards = list()
             step_idx = 0
             done = False
             num_goal_achieved = 0
@@ -118,15 +119,19 @@ class ManiSkill2Runner(BaseRunner):
                 for i in range(len(action)):
                     obs, reward, done, _, info = env.step(action[i])
                     # all_goal_achieved.append(info['goal_achieved']
-                    rewards.append(reward)
+                    # print(f"Step {actual_step_count} Reward: {reward} Done: {done} Success: {info['success']}")
                     obs_deque.append(obs)
                     done = np.all(done)
                     actual_step_count += 1
+                    if actual_step_count >= self.max_steps or info['success']:
+                        done = True
+                        break
                     env.render()
 
+            rewards.append(reward)
+            num_goal_achieved += np.sum(info['success'])
             all_success_rates.append(info['success'])
             all_goal_achieved.append(num_goal_achieved)
-            env.close()
 
         # log
         log_data = dict()
@@ -137,7 +142,7 @@ class ManiSkill2Runner(BaseRunner):
 
         log_data['test_mean_score'] = np.mean(all_success_rates)
 
-        cprint(f"test_mean_score: {np.mean(all_success_rates)}", 'green')
+        cprint(f"test_mean_score: {np.mean(all_success_rates)}, average_reward: {np.mean(rewards)}", 'green')
 
         self.logger_util_test.record(np.mean(all_success_rates))
         self.logger_util_test10.record(np.mean(all_success_rates))
@@ -154,6 +159,6 @@ class ManiSkill2Runner(BaseRunner):
         _ = env.reset()
         # clear memory
         videos = None
-        del env
+        env.close()
 
         return log_data
