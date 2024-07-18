@@ -27,7 +27,7 @@ def visualize_rgb(datasets_dir):
 def plot_point_cloud(obs):
     fig = plt.figure(figsize=(12, 7))
     ax = fig.add_subplot(111, projection='3d')
-    tensor = obs[30]
+    tensor = obs[200]
     print(tensor.shape)
     x = tensor[:, 0]
     y = tensor[:, 1]

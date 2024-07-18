@@ -127,8 +127,8 @@ class ManiSkill2Runner(BaseRunner):
                         done = True
                         break
                     env.render()
-
-            rewards.append(reward)
+            
+            rewards.append(round(reward, 4))
             num_goal_achieved += np.sum(info['success'])
             all_success_rates.append(info['success'])
             all_goal_achieved.append(num_goal_achieved)
@@ -140,9 +140,8 @@ class ManiSkill2Runner(BaseRunner):
         log_data['mean_n_goal_achieved'] = np.mean(all_goal_achieved)
         log_data['mean_success_rates'] = np.mean(all_success_rates)
 
-        log_data['test_mean_score'] = np.mean(all_success_rates)
-
-        cprint(f"test_mean_score: {np.mean(all_success_rates)}, average_reward: {np.mean(rewards)}", 'green')
+        log_data['test_mean_score'] = np.mean(rewards)
+        cprint(f"test_mean_score: {np.mean(rewards)}", 'green')
 
         self.logger_util_test.record(np.mean(all_success_rates))
         self.logger_util_test10.record(np.mean(all_success_rates))
