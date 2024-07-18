@@ -1,11 +1,14 @@
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 # DO NOT CALL THESE FUNCTIONS INSIDE OF THE MAINLOOP OF MANISKILL, DUE TO CRASHES!!!
+
 
 def plot_point_cloud(obs):
     fig = plt.figure(figsize=(12, 7))
     ax = fig.add_subplot(111, projection='3d')
-    tensor = obs["pointcloud"]["xyzw"][0]
+    tensor = obs  # ["pointcloud"]["xyzw"]
     x = tensor[:, 0]
     y = tensor[:, 1]
     z = tensor[:, 2]
@@ -23,8 +26,7 @@ def plot_point_cloud(obs):
 
 
 def plot_rgb(obs, sensor_name: str = "base_camera"):
-    image_tensor = obs["sensor_data"][sensor_name]["rgb"][0]
-    fig = plt.imshow(image_tensor)
-    plt.title(f'RGB Image from {sensor_name}')
-    plt.show()
-    plt.close()
+    image_array = obs["image"][sensor_name]["Color"][:, :, [0, 1, 2]]
+    image_array = (image_array * 255).astype(np.uint8)
+    image_pil = Image.fromarray(image_array)
+    image_pil.show()

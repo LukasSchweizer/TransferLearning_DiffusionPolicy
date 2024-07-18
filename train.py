@@ -23,15 +23,15 @@ from models.base_models.vision_encoder import get_resnet, replace_bn_with_gn
 from models.datasets.maniskill_dataset import ManiSkillTrajectoryDataset
 
 # TODO: add main function with arguments
-digest_trajectory_data = False
+digest_trajectory_data = True
 
 # download demonstration data from Google Drive
-dataset_path = "demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos.h5"
-zarr_path = "demos/TurnFaucet-v0/5000.rgbd.pd_joint_pos_hand_cam.zarr"
+dataset_path = "demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.h5"
+zarr_path = "demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.zarr"
 
 if digest_trajectory_data:
     trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=-1, success_only=True, device=None, zarr_path=zarr_path)
-
+'''
 # parameters
 pred_horizon = 16
 obs_horizon = 2
@@ -249,3 +249,4 @@ ema.copy_to(ema_nets.parameters())
 
 torch.save(ema_nets.state_dict(), 
            f'models/checkpoints/ema_nets_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.pth')
+'''
