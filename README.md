@@ -93,15 +93,22 @@ bash eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 
 ## Methodology:
 1. ```DONE:``` Setup:
-    - Using Proprioception (joint position and velocity) - (pd_joint_pos)
-    - Using Segmented Pointcloud (Only include sampled (4096 points) pointlcouds of the robot and faucet)
-    - Using downloaded trajectories (100)
+    | Proprioception | Point-cloud size | PC Sampling Method | Transfer-Success     | Same Faucet Success  | Train Duration (100 demos)|
+    |----------------|------------------|--------------------|----------------------|----------------------|---------------------------|
+    | qpos + qvel    | 4096             | Uniform Sampling   | 0.0% (reward -)      | 15% (reward 0.1942)  | 200 epochs, batchsize 16  |
+    | tcp            | 1024             | Furthest-Point     | 0.0% (reward 0.0570) | 5%  (reward 0.1074)  | 500 epochs, batchsize 128 |
+    | qpos           | 4096             | Furthest-Point     |         -            |           -          |            -              |
+    | qpos + qvel    | 4096             | Furthest-Point     |         -            |           -          |            -              |
+    - Control method: pd_joint_pos
+    - Segmented pointcloud: robot, faucet
+    - Number demonstrations: 100
+    - Training epochs: 500 
 2. ```DONE:``` Train 3DP on 1 Faucet, see if that is enough to transfer to one similarly categorized faucet 
     - Failed, overfits on the first faucet
 
     | Samples | Training-Faucets | Transfer-Faucet | Epochs | Transfer-Success |
     |---------|------------------|-----------------|--------|------------------|
-    | 100     | 5000             | 5001            | 175    | 0.22             |
+    | 100     | 5000             | 5001            | 175    |                  |
 
 3. ```TODO:``` Train 3DP on 1 Faucet, but use End Effector Position instead of pd_joint_pos, see if it transfers
 4. ```TODO:``` Train 3DP on many examples of similar faucets, see if it can transfer to other faucets (similar category and other categories)

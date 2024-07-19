@@ -14,6 +14,7 @@ import collections
 import mani_skill2.utils.sapien_utils as utils
 import mani_skill2.envs
 from utils.filter_pointcloud import filter_pointcloud_by_segmentation, downsample_point_clouds
+from utils.visualize_data import plot_point_cloud
 
 
 class ManiSkill2Runner(BaseRunner):
@@ -30,6 +31,8 @@ class ManiSkill2Runner(BaseRunner):
                  task_name=None,
                  use_point_crop=True,
                  num_sampled_pts=1024,
+                 state_method="qpos_qvel",
+                 render_pointcloud=False,
                  ):
         super().__init__(output_dir)
         self.task_name = task_name
@@ -67,6 +70,9 @@ class ManiSkill2Runner(BaseRunner):
         self.logger_util_test = logger_util.LargestKRecorder(K=3)
         self.logger_util_test10 = logger_util.LargestKRecorder(K=5)
 
+        self.state_method = state_method
+        self.render_pointcloud = render_pointcloud
+
     def segment_pointcloud(self, pointcloud, segmentation):
         segmented_pointcloud = []
         for i in range(self.n_obs_steps):
@@ -91,7 +97,7 @@ class ManiSkill2Runner(BaseRunner):
         for episode_idx in tqdm.tqdm(range(self.eval_episodes), desc=f"Eval in Maniskill2 {self.task_name} Pointcloud Env",
                                      leave=False, mininterval=self.tqdm_interval_sec):
             # start rollout
-            obs, _ = env.reset(seed=seeds[episode_idx], options=dict(model_id="5000"))
+            obs, _ = env.reset(seed=seeds[episode_idx], options=dict(model_id="5001"))
             policy.reset()
 
             # keep a queue of last 2 steps of observations
@@ -102,12 +108,22 @@ class ManiSkill2Runner(BaseRunner):
             done = False
             num_goal_achieved = 0
             actual_step_count = 0
+            plot_pt_cloud = None
             while not done:
                 # create obs dict
                 pointcloud = np.stack([x["pointcloud"]["xyzw"] for x in obs_deque])
                 segmentation = np.stack([x["pointcloud"]["Segmentation"] for x in obs_deque])
                 processed_pointcloud = self.segment_pointcloud(pointcloud, segmentation)
-                agent_poses = obs["extra"]["tcp_pose"][i], # np.stack([np.concatenate((x["agent"]["qpos"], x["agent"]["qvel"])).flatten() for x in obs_deque])
+                plot_pt_cloud = processed_pointcloud
+
+                # Select state method
+                if self.state_method == "qpos_qvel":
+                    agent_poses = np.stack([np.concatenate((x["agent"]["qpos"], x["agent"]["qvel"])).flatten() for x in obs_deque])
+                elif self.state_method == "qpos":
+                    agent_poses = np.stack([x["agent"]["qpos"] for x in obs_deque])
+                elif self.state_method == "tcp":
+                    agent_poses = np.stack([x["extra"]["tcp_pose"] for x in obs_deque]) 
+                
                 data = {
                     "point_cloud": processed_pointcloud,
                     "agent_pos": agent_poses,
@@ -143,6 +159,8 @@ class ManiSkill2Runner(BaseRunner):
                         done = True
                         break
                     env.render()
+            if self.render_pointcloud:
+                plot_point_cloud(plot_pt_cloud, 0)
             
             rewards.append(round(reward, 4))
             num_goal_achieved += np.sum(info['success'])
