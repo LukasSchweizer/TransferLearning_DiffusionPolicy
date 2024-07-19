@@ -29,7 +29,7 @@ class ManiSkill2Runner(BaseRunner):
                  tqdm_interval_sec=5.0,
                  task_name=None,
                  use_point_crop=True,
-                 num_sampled_pts=4096,
+                 num_sampled_pts=1024,
                  ):
         super().__init__(output_dir)
         self.task_name = task_name
@@ -107,7 +107,7 @@ class ManiSkill2Runner(BaseRunner):
                 pointcloud = np.stack([x["pointcloud"]["xyzw"] for x in obs_deque])
                 segmentation = np.stack([x["pointcloud"]["Segmentation"] for x in obs_deque])
                 processed_pointcloud = self.segment_pointcloud(pointcloud, segmentation)
-                agent_poses = np.stack([np.concatenate((x["agent"]["qpos"], x["agent"]["qvel"])).flatten() for x in obs_deque])
+                agent_poses = obs["extra"]["tcp_pose"][i], # np.stack([np.concatenate((x["agent"]["qpos"], x["agent"]["qvel"])).flatten() for x in obs_deque])
                 data = {
                     "point_cloud": processed_pointcloud,
                     "agent_pos": agent_poses,

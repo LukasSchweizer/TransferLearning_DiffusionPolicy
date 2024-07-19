@@ -127,13 +127,12 @@ class ManiSkillTrajectoryDataset(Dataset):
             segmented_rgb = filter_pointcloud_by_segmentation(rgb, segmentation, [14])
 
             # Uniformly sample points from pointcloud to ensure equal size
-            num_points = 4096
+            num_points = 1024
             segmented_pointcloud, segmented_rgb = downsample_point_clouds([segmented_pointcloud, segmented_rgb], num_points)
-
             data_dict.append({
                 "pointcloud": segmented_pointcloud,
                 "rgb": segmented_rgb,
-                "state": np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
+                "state": obs["extra"]["tcp_pose"][i], # np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32),
                 "action": actions[i].astype(np.float32),
             })
             #data_dict.append({

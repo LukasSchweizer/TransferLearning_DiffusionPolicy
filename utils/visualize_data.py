@@ -53,7 +53,7 @@ if __name__ == "__main__":
     
     ##############################
     # Set the data location here
-    data = 'demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.zarr/data/pointcloud'
+    data = 'demos/TurnFaucet-v0/5000.pointcloud.4096.pd_joint_pos.zarr/data/pointcloud'
     ##############################
 
     visualize_pointcloud(data)

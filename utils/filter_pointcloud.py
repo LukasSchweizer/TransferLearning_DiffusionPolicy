@@ -1,3 +1,4 @@
+import fpsample
 import numpy as np
 
 
@@ -27,13 +28,14 @@ def filter_pointcloud_by_segmentation(pointcloud, segmentation, filter_classes, 
     return filtered_pointcloud
 
 
-def downsample_point_clouds(point_clouds, num_points):
+def downsample_point_clouds(point_clouds, num_points, fps_sampling=True):
     """
     Downsample multiple point clouds to a fixed number of points using the same indices.
 
     Parameters:
     - point_clouds (list of np.array): List of point clouds to downsample. Each point cloud is a (N, D) array.
     - num_points (int): The number of points to downsample each point cloud to.
+    - fps_sampling (bool): Whether to use farthest point sampling for downsampling, default is yes.
 
     Returns:
     - downsampled_point_clouds (list of np.array): List of downsampled point clouds.
@@ -43,8 +45,13 @@ def downsample_point_clouds(point_clouds, num_points):
     if min_points < num_points:
         raise ValueError(f"One of the point clouds has fewer than {num_points} points.")
 
-    # Select common indices for downsampling
-    common_indices = np.random.choice(min_points, num_points, replace=False)
+    if fps_sampling:
+        # Use farthest point sampling for downsampling
+        common_indices = fpsample.bucket_fps_kdline_sampling(point_clouds[0], num_points, h=5)
+    else:
+        # Otherwise, use uniform sampling.
+        # Select common indices for downsampling
+        common_indices = np.random.choice(min_points, num_points, replace=False)
 
     # Downsample each point cloud using the common indices
     downsampled_point_clouds = [pc[common_indices, :] for pc in point_clouds]
