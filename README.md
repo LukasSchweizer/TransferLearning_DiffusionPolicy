@@ -90,9 +90,23 @@ bash eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 # TODO
 ```
 
-## TODO:
-1. Save videos/images from the teleop control
-2. Record Demos (50-100)
-3. Create trainer for Diffusion Policy
-4. Incorporate Diffusion Policy
-5. Tranfer learning to new tasks x5
+
+## Methodology:
+1. ```DONE:``` Setup:
+    - Using Proprioception (joint position and velocity) - (pd_joint_pos)
+    - Using Segmented Pointcloud (Only include sampled (4096 points) pointlcouds of the robot and faucet)
+    - Using downloaded trajectories (100)
+2. ```DONE:``` Train 3DP on 1 Faucet, see if that is enough to transfer to one similarly categorized faucet 
+    - Failed, overfits on the first faucet
+
+    | Samples | Training-Faucets | Transfer-Faucet | Epochs | Transfer-Success |
+    |---------|------------------|-----------------|--------|------------------|
+    | 100     | 5000             | 5001            | 175    | 0.22             |
+
+3. ```TODO:``` Train 3DP on 1 Faucet, but use End Effector Position instead of pd_joint_pos, see if it transfers
+4. ```TODO:``` Train 3DP on many examples of similar faucets, see if it can transfer to other faucets (similar category and other categories)
+5. ```TODO:``` Train 3DP on many examples of multiplce categories of faucets, see if it can transfer to unseen categories
+6. ```TODO:``` If previous successful, do step (4) on new tasks
+    - Cabinet?
+    - Peg Insert?
+    - Object Pickup?
