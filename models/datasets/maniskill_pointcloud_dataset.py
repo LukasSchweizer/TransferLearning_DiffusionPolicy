@@ -8,7 +8,6 @@ from diffusion_policy_3d.common.sampler import (
     SequenceSampler, get_val_mask, downsample_mask)
 from diffusion_policy_3d.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
 from diffusion_policy_3d.dataset.base_dataset import BaseDataset
-from utils.filter_pointcloud import filter_pointcloud_by_segmentation
 
 class ManiskillDataset(BaseDataset):
     def __init__(self,
@@ -25,23 +24,23 @@ class ManiskillDataset(BaseDataset):
         self.task_name = task_name
         self.replay_buffer = ReplayBuffer.copy_from_path(
             zarr_path, keys=['state', 'action', 'pointcloud', 'rgb'])
-        # val_mask = get_val_mask(
-        #     n_episodes=self.replay_buffer.n_episodes, 
-        #     val_ratio=val_ratio,
-        #     seed=seed)
-        # train_mask = ~val_mask
-        # train_mask = downsample_mask(
-        #     mask=train_mask, 
-        #     max_n=max_train_episodes, 
-        #     seed=seed)
+        val_mask = get_val_mask(
+            n_episodes=self.replay_buffer.n_episodes, 
+            val_ratio=val_ratio,
+            seed=seed)
+        train_mask = ~val_mask
+        train_mask = downsample_mask(
+            mask=train_mask, 
+            max_n=max_train_episodes, 
+            seed=seed)
 
         self.sampler = SequenceSampler(
             replay_buffer=self.replay_buffer, 
             sequence_length=horizon,
             pad_before=pad_before, 
-            pad_after=pad_after) #,
-            #episode_mask=train_mask)
-        self.train_mask = None #train_mask
+            pad_after=pad_after,
+            episode_mask=train_mask)
+        self.train_mask = train_mask
         self.horizon = horizon
         self.pad_before = pad_before
         self.pad_after = pad_after
@@ -52,10 +51,10 @@ class ManiskillDataset(BaseDataset):
             replay_buffer=self.replay_buffer, 
             sequence_length=self.horizon,
             pad_before=self.pad_before, 
-            pad_after=self.pad_after) #,
-            #episode_mask=~self.train_mask
-            #)
-        # val_set.train_mask = ~self.train_mask
+            pad_after=self.pad_after,
+            episode_mask=~self.train_mask
+            )
+        val_set.train_mask = ~self.train_mask
         return val_set
 
     def get_normalizer(self, mode='limits', **kwargs):

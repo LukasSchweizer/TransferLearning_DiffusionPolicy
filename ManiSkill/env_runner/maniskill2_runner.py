@@ -90,7 +90,7 @@ class ManiSkill2Runner(BaseRunner):
         all_goal_achieved = []
         all_success_rates = []
         rewards = []
-        seeds = np.linspace(200, 199 + self.eval_episodes, num=self.eval_episodes, dtype=int)
+        seeds = np.linspace(1020, 1019 + self.eval_episodes, num=self.eval_episodes, dtype=int)
 
         cprint(f"evaluating {self.eval_episodes} episodes using seeds {seeds}", 'cyan')
 
@@ -123,6 +123,8 @@ class ManiSkill2Runner(BaseRunner):
                     agent_poses = np.stack([x["agent"]["qpos"] for x in obs_deque])
                 elif self.state_method == "tcp":
                     agent_poses = np.stack([x["extra"]["tcp_pose"] for x in obs_deque]) 
+                elif self.state_method == "qpos_tcp":
+                    agent_poses = np.stack([np.concatenate((x["agent"]["qpos"], x["extra"]["tcp_pose"])).flatten() for x in obs_deque])
                 
                 data = {
                     "point_cloud": processed_pointcloud,
@@ -158,7 +160,7 @@ class ManiSkill2Runner(BaseRunner):
                     if actual_step_count >= self.max_steps or info['success']:
                         done = True
                         break
-                    env.render()
+                    #env.render()
             if self.render_pointcloud:
                 plot_point_cloud(plot_pt_cloud, 0)
             

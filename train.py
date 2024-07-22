@@ -26,11 +26,11 @@ from models.datasets.maniskill_dataset import ManiSkillTrajectoryDataset
 digest_trajectory_data = True
 
 # download demonstration data from Google Drive
-dataset_path = "demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.h5"
-zarr_path = "demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.zarr"
+dataset_path = "demos/TurnFaucet-v0/5001.pointcloud.pd_joint_pos.h5"
+zarr_path = "demos/TurnFaucet-v0/5001.pointcloud.1024.pd_joint_pos.qpos_tcp.demos.10.zarr"
 
 if digest_trajectory_data:
-    trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=-1, success_only=True, device=None, zarr_path=zarr_path)
+    trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=10, success_only=True, device=None, zarr_path=zarr_path, state_method="qpos_tcp")
 '''
 # parameters
 pred_horizon = 16

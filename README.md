@@ -93,16 +93,18 @@ bash eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 
 ## Methodology:
 1. ```DONE:``` Setup:
-    | Proprioception | Point-cloud size | PC Sampling Method | Transfer-Success     | Same Faucet Success  | Train Duration (100 demos)|
+    | Proprioception | Point-cloud size | PC Sampling Method | Transfer-Success     | Same Faucet Success  | Epochs/Demos/Batch/Model  |
     |----------------|------------------|--------------------|----------------------|----------------------|---------------------------|
-    | qpos + qvel    | 4096             | Uniform Sampling   | 0.0% (reward -)      | 15% (reward 0.1942)  | 200 epochs, batchsize 16  |
-    | tcp            | 1024             | Furthest-Point     | 0.0% (reward 0.0570) | 5%  (reward 0.1074)  | 500 epochs, batchsize 128 |
-    | qpos           | 4096             | Furthest-Point     |         -            |           -          |            -              |
-    | qpos + qvel    | 4096             | Furthest-Point     |         -            |           -          |            -              |
+    | qpos + qvel    | 4096             | Uniform Sampling   | 0.0% (reward -)      | 15% (reward 0.1942)  | 200/100/16/5000           |
+    | tcp            | 1024             | Furthest-Point     | 0.0% (reward 0.0570) | 5%  (reward 0.1074)  | 500/100/128/5000          |
+    | qpos + qvel    | 1024             | Furthest-Point     | 0.0% (reward 0.0518) | 10% (reward 0.1537)  | 200/100/16/5000           |
+    | qpos + qvel    | 1024             | Furthest-Point     | 0.0% (reward 0.0518) | 0% (reward 0.0575)   | 3000/10/128/5000          |
+    | qpos + qvel    | 1024             | Furthest-Point     | 0.0% (reward 0.0518) | 5% (reward 0.0575)   | 200/40/128/5001           |
+    | qpos + tcp     | 1024             | Furthest-Point     | -                    | 20% (reward 0.0575)  | 3000/10/128/5001          |
+    | qpos + tcp     | 1024             | Furthest-Point     | -                    | 35% (reward 0.0575)  | 200/40/128/5001           |
     - Control method: pd_joint_pos
     - Segmented pointcloud: robot, faucet
-    - Number demonstrations: 100
-    - Training epochs: 500 
+
 2. ```DONE:``` Train 3DP on 1 Faucet, see if that is enough to transfer to one similarly categorized faucet 
     - Failed, overfits on the first faucet
 
