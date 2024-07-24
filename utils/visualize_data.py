@@ -24,11 +24,10 @@ def visualize_rgb(datasets_dir):
     im1 = Image.fromarray(image.astype(np.uint8), mode='RGB')
     im1.show()
 
-def plot_point_cloud(obs):
+def plot_point_cloud(obs, index):
     fig = plt.figure(figsize=(12, 7))
     ax = fig.add_subplot(111, projection='3d')
-    tensor = obs[200]
-    print(tensor.shape)
+    tensor = obs[index]
     x = tensor[:, 0]
     y = tensor[:, 1]
     z = tensor[:, 2]
@@ -47,13 +46,13 @@ def plot_point_cloud(obs):
 def visualize_pointcloud(datasets_dir):
     data = read_data(datasets_dir)
     # visualizer.visualize_pointcloud(data)
-    plot_point_cloud(data)
+    plot_point_cloud(data, 200)
 
 if __name__ == "__main__":
     
     ##############################
     # Set the data location here
-    data = 'demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.zarr/data/pointcloud'
+    data = 'demos/TurnFaucet-v0/5000.pointcloud.4096.pd_joint_pos.zarr/data/pointcloud'
     ##############################
 
     visualize_pointcloud(data)

@@ -29,3 +29,4 @@ dependencies:
       - termcolor
       - kaleido
       - plotly
+      - fpsample==0.3.2
