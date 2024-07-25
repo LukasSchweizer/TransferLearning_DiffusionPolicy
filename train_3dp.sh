@@ -1,5 +1,5 @@
 # Examples:
-# bash train_3dp.sh dp3 maniskill2_faucet 0322 0 0
+# bash train_3dp.sh dp3 maniskill2_faucet 0322 0 0 test
 
 DEBUG=False
 save_ckpt=True
@@ -9,8 +9,10 @@ task_name=${2}
 config_name=${alg_name}
 addition_info=${3}
 seed=${4}
+dataset_path=${6}
 exp_name=${task_name}-${alg_name}-${addition_info}
 run_dir="data/outputs/${exp_name}_seed${seed}"
+zarr_path="demos/${dataset_path}/full_dataset.zarr"
 
 
 # gpu_id=$(bash scripts/find_gpu.sh)
@@ -39,4 +41,5 @@ python train_3dp.py --config-name=${config_name}.yaml \
                             training.device="cuda:0" \
                             exp_name=${exp_name} \
                             logging.mode=${wandb_mode} \
-                            checkpoint.save_ckpt=${save_ckpt}
+                            checkpoint.save_ckpt=${save_ckpt} \
+                            task.dataset.zarr_path=${zarr_path}

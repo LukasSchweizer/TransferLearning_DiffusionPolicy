@@ -36,58 +36,74 @@ You should now be in the activated conda environment, `dlproject`.
 
 ## Workflow: 
 ### 1. Collecting Demos
-(*Starting with *TurnFaucet* and adding more later.*)
 
 #### **Collect Demonstrations via Keyboard Teleop**
 ```bash
 python ManiSkill/data_collection/teleop.py -e "TurnFaucet-v0"
 ```
 
-#### **Download Demonstrations**
+#### **OR Download Demonstrations**
 ```bash
 # Download all rigid-body demonstrations (TODO: Download only necessary demos)
 gdown https://drive.google.com/drive/folders/1pd9Njg2sOR1VSSmp-c1mT7zCgJEnF8r7 --folder -O demos/
 ```
 After downloading you have to unzip it into the demos folder
 
-#### **Create .zarr from Demonstrations**
-```bash
-# Adapt file paths in train.py and run it
-python train.py
+#### **Collect Demonstrations via Prerecorded Trajectories**
+- In order to streamline the process of data preparation, place the downloaded trajectories (.h5 and .json) into the following file structure.
+    - category_a will include any original training faucet models.
+    - category_b will include any transfer faucet models (exclude if not needed)
+- Feel free to change the experiment name, but do not change the names for the subdirectories (category_a and category_b).
+
+```
+demos
+ ├── your_experiment          # Parent folder, specify as dataset path
+ |    ├── category_a          # First category of faucet, do not change this name
+ |    |   └── *.h5, *.json    # Place any faucets from the first category in here (ex. 5000.h5, 5000.json)
+ |    └── category_b          # First category of faucet, do not change this name
+ |        └── *.h5, *.json    # Place any faucets from the second category in here
 ```
 
-#### **Collect Demonstrations via Prerecorded Trajectories**
+- Once you have added all desired models, run the following command at the root directory of the project:
+
+```bash
+bash generate_data.sh "demos/your_experiment" 10 2
+```
+
+- Change the integer args to change number of trajectories to be collected for category_a and category_b respectively.
+- This will save data into .zarr format. 
+    - Pass this zarr file location `demos/your_experiment/full_dataset.zarr` into the training script (or hydra file in maniskill2_faucet.yaml at dataset.zarr_path).
+
+- **Alternatively**, use the following commands to rerun trajectories for specific faucets:
+
 ```bash
 # Save RGB
 python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "rgbd"
-
 # Save PointCloud (only pointcloud)
 python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "pointcloud"
 # with Segmentation
 python -m ManiSkill.data_collection.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "pointcloud"
+
+# Generate Zarr File
+python generate_data.py --dataset_path "demos/TurnFaucet-v0/5000.pointcloud.pd_joint_pos.h5" --directory "demos/TurnFaucet-v0" --replay_nums 100
 ```
 
 ### 2. Train Diffusion Policy
 ```bash
+# 3D Diffusion
+bash train_3dp.sh dp3 maniskill2_faucet 0322 0 0 your_experiment
+
 # 2D Diffusion
 python train.py
-
-# 3D Diffusion
-bash train_3dp.sh dp3 maniskill2_faucet 0322 0 0
 ```
 
 ### 3. Run "TurnFaucet-v0" as controlled the trained diffusion policy
 ```bash
-# 2D Diffusion
-python gym.py --object-id="5000"
-
 # 3D Diffusion
 bash eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
-```
 
-### 4. Figure out how to transfer the policy to another action (5 more actions???)
-```python
-# TODO
+# 2D Diffusion
+python gym.py --object-id="5000"
 ```
 
 

@@ -1,5 +1,5 @@
 defaults:
-  - task: adroit_hammer
+  - task: maniskill2_faucet
 
 name: train_dp3
 
@@ -49,7 +49,6 @@ policy:
     steps_offset: 0
     prediction_type: sample
 
-
   num_inference_steps: 10
   obs_as_global_cond: true
   shape_meta: ${shape_meta}
@@ -57,14 +56,12 @@ policy:
   use_pc_color: false
   pointnet_type: "pointnet"
 
-
   pointcloud_encoder_cfg:
     in_channels: 3
     out_channels: ${policy.encoder_output_dim}
     use_layernorm: true
     final_norm: layernorm # layernorm, none
     normal_channel: false
-
 
 ema:
   _target_: diffusion_policy_3d.model.diffusion.ema_model.EMAModel

@@ -31,7 +31,7 @@ env_runner:
 
 dataset:
   _target_: models.datasets.maniskill_pointcloud_dataset.ManiskillDataset
-  zarr_path: demos/TurnFaucet-v0/5001.pointcloud.1024.pd_joint_pos.qpos_tcp.demos.40.zarr
+  zarr_path: ""
   horizon: ${horizon}
   pad_before: ${eval:'${n_obs_steps}-1'}
   pad_after: ${eval:'${n_action_steps}-1'}

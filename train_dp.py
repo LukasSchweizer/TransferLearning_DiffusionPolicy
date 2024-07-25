@@ -31,7 +31,7 @@ zarr_path = "demos/TurnFaucet-v0/5001.pointcloud.1024.pd_joint_pos.qpos_tcp.demo
 
 if digest_trajectory_data:
     trajectory_data = ManiSkillTrajectoryDataset(dataset_path, load_count=10, success_only=True, device=None, zarr_path=zarr_path, state_method="qpos_tcp")
-'''
+
 # parameters
 pred_horizon = 16
 obs_horizon = 2
@@ -249,4 +249,4 @@ ema.copy_to(ema_nets.parameters())
 
 torch.save(ema_nets.state_dict(), 
            f'models/checkpoints/ema_nets_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.pth')
-'''
+
