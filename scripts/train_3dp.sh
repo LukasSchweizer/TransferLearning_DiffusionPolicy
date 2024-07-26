@@ -1,5 +1,5 @@
 # Examples:
-# bash train_3dp.sh dp3 maniskill2_faucet 0322 0 0 test
+# bash scripts/train_3dp.sh dp3 maniskill2_faucet 0322 0 0 test
 
 DEBUG=False
 save_ckpt=True
@@ -27,7 +27,7 @@ if [ $DEBUG = True ]; then
     echo -e "\033[33mDebug mode!\033[0m"
     echo -e "\033[33mDebug mode!\033[0m"
 else
-    wandb_mode=online
+    wandb_mode=offline
     echo -e "\033[33mTrain mode\033[0m"
 fi
 

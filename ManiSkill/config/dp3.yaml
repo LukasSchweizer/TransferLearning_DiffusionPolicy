@@ -113,7 +113,7 @@ training:
 logging:
   group: ${exp_name}
   id: null
-  mode: online
+  mode: offline
   name: ${training.seed}
   project: dp3
   resume: true

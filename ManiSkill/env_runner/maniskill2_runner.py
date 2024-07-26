@@ -172,12 +172,12 @@ class ManiSkill2Runner(BaseRunner):
                 num_goal_achieved += np.sum(info['success'])
                 all_success_rates.append(info['success'])
                 all_goal_achieved.append(num_goal_achieved)
-                seed_successes[eval_seeds[seed_idx]].append(info['success'])
+                seed_successes[eval_seeds[seed_idx]].append(bool(info['success']))
 
         # log
         log_data = dict()
         
-
+        log_data['seeded_runs'] = seed_successes
         log_data['mean_n_goal_achieved'] = np.mean(all_goal_achieved)
         log_data['mean_success_rates'] = np.mean(all_success_rates)
 
@@ -189,7 +189,7 @@ class ManiSkill2Runner(BaseRunner):
         log_data['SR_test_L3'] = self.logger_util_test.average_of_largest_K()
         log_data['SR_test_L5'] = self.logger_util_test10.average_of_largest_K()
 
-        cprint(seed_successes, 'red')
+        cprint(log_data, 'red')
 
         # videos = env.env.get_video()
         # if len(videos.shape) == 5:

@@ -1,5 +1,5 @@
 # Examples:
-# bash generate_data.sh "demos/test" 10 2
+# bash scripts/generate_data.sh "demos/test" 10 2
 
 dataset_path=${1}
 category_one_num_replays=${2}

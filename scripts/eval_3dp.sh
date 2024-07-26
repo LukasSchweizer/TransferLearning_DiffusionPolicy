@@ -1,6 +1,6 @@
 # use the same command as training except the script
 # for example:
-# bash eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
+# bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 
 
 
