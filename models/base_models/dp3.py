@@ -40,6 +40,7 @@ class DP3(BasePolicy):
             use_pc_color=False,
             pointnet_type="pointnet",
             pointcloud_encoder_cfg=None,
+            freeze_unet_down=False,
             # parameters passed to step
             **kwargs):
         super().__init__()
@@ -101,6 +102,9 @@ class DP3(BasePolicy):
             use_up_condition=use_up_condition,
         )
 
+        # Freeze the down part of the U-Net if freeze_unet_down is True else unfreeze it
+        self.toggle_unet_down_part(freeze_unet_down)
+
         self.obs_encoder = obs_encoder
         self.model = model
         self.noise_scheduler = noise_scheduler
@@ -130,6 +134,14 @@ class DP3(BasePolicy):
 
 
         print_params(self)
+
+    def toggle_unet_down_part(self, freeze: bool):
+        """
+        :param freeze: If freeze is True: Freeze the downpart of the U-Net
+        else unfreeze
+        :return: None
+        """
+        self.model.down_modules.requires_grad_(freeze)
         
     # ========= inference  ============
     def conditional_sample(self, 

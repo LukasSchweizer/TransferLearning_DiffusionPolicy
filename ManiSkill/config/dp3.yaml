@@ -22,6 +22,7 @@ policy:
   use_down_condition: true
   use_mid_condition: true
   use_up_condition: true
+  freeze_unet_down: false
   
   diffusion_step_embed_dim: 128
   down_dims:
