@@ -90,7 +90,7 @@ class ManiSkill2Runner(BaseRunner):
         all_goal_achieved = []
         all_success_rates = []
         rewards = []
-        eval_seeds = [1, 2, 3] #np.linspace(1040, 1042, num=3*self.eval_episodes, dtype=int)
+        eval_seeds = [0, 1, 2] #np.linspace(1040, 1042, num=3*self.eval_episodes, dtype=int)
         models = ["5001", "5006"]
         success_log = {}
 
