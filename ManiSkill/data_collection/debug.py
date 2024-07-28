@@ -14,7 +14,7 @@ def plot_point_cloud(obs):
     z = tensor[:, 2]
     # Plot points
     img = ax.scatter(x, y, z)
-    fig.colorbar(img)
+    # fig.colorbar(img)
     # Set labels and title
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
@@ -26,7 +26,8 @@ def plot_point_cloud(obs):
 
 
 def plot_rgb(obs, sensor_name: str = "base_camera"):
-    image_array = obs["image"][sensor_name]["Color"][:, :, [0, 1, 2]]
+    image_array = obs["image"][sensor_name]["Color"]
+    print(image_array.shape)
     image_array = (image_array * 255).astype(np.uint8)
     image_pil = Image.fromarray(image_array)
     image_pil.show()
