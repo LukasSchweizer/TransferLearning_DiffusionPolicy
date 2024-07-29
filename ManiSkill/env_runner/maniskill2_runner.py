@@ -89,7 +89,6 @@ class ManiSkill2Runner(BaseRunner):
 
         all_goal_achieved = []
         all_success_rates = []
-        rewards = []
         eval_seeds = [0, 1, 2] #np.linspace(1040, 1042, num=3*self.eval_episodes, dtype=int)
         models = ["5001", "5006"]
         success_log = {}
@@ -101,7 +100,7 @@ class ManiSkill2Runner(BaseRunner):
             seed_successes = {}
             for seed_idx in tqdm.tqdm(range(len(eval_seeds)), desc="Seeded Eval", leave=False, mininterval=self.tqdm_interval_sec):
                 seed_successes[eval_seeds[seed_idx]] = []
-
+                rewards = []
                 for episode_idx in tqdm.tqdm(range(self.eval_episodes), desc=f"Eval in Maniskill2 {self.task_name} Pointcloud Env",
                                             leave=False, mininterval=self.tqdm_interval_sec):
                     # start rollout
@@ -117,6 +116,7 @@ class ManiSkill2Runner(BaseRunner):
                     num_goal_achieved = 0
                     actual_step_count = 0
                     plot_pt_cloud = None
+                    reward_keeper = []
                     while not done:
                         # create obs dict
                         pointcloud = np.stack([x["pointcloud"]["xyzw"] for x in obs_deque])
@@ -169,18 +169,20 @@ class ManiSkill2Runner(BaseRunner):
                                 done = True
                                 break
                             #env.render()
+                            reward_keeper.append(round(reward, 4))
                     if self.render_pointcloud:
                         plot_point_cloud(plot_pt_cloud, 0)
                     
-                    rewards.append(round(reward, 4))
+                    rewards.append(np.mean(reward_keeper))
                     num_goal_achieved += np.sum(info['success'])
                     all_success_rates.append(info['success'])
                     all_goal_achieved.append(num_goal_achieved)
                     seed_successes[eval_seeds[seed_idx]].append(bool(info['success']))
+                    seed_successes[eval_seeds[seed_idx]].append(np.mean(rewards))
                 
-                run_avg = np.mean(seed_successes[eval_seeds[seed_idx]])
-                cprint(f"(Model {model}) Seed no. {eval_seeds[seed_idx]} average success rate: {run_avg}", 'magenta')
-            
+                run_avg = np.mean(seed_successes[eval_seeds[seed_idx]][0])
+                cprint(f"(Model {model}) Seed no. {eval_seeds[seed_idx]} avg success rate: {run_avg}, avg reward: {np.mean(rewards)}", 'magenta')
+                
             success_log[model] = seed_successes
 
         # log
