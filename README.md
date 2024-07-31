@@ -68,7 +68,7 @@ bash scripts/generate_data.sh "demos/your_experiment" 10 2
 bash scripts/train_3dp.sh dp3 maniskill2_faucet 0322 0 0 your_experiment
 ```
 
-### 3. Run "TurnFaucet-v0" as controlled the trained diffusion policy
+### 3. Evaluate Task
 ```bash
 # 3D Diffusion
 bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
