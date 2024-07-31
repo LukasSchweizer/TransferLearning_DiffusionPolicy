@@ -74,7 +74,6 @@ bash scripts/train_3dp.sh dp3 maniskill2_faucet 0322 0 0 your_experiment
 bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 ```
 
-
 ## Methodology:
 - Single Faucet
     1. Single Faucet Original (without finetuning)
@@ -100,12 +99,6 @@ bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
         |    └── category_b             # 2 Demos
         |        └── 5006    
         ```
-    - Results:
-        |                  | single_faucet_original | single_faucet_transfer | single_faucet_finetuned |
-        |------------------|------------------------|------------------------|-------------------------|
-        |      success     |                        |                        |                         |
-        | transfer success |                        |                        |                         |
-
 - Single Category
     1. Single Category Original (without finetuning)
         ```
@@ -132,12 +125,6 @@ bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
         |    └── category_b                     # 2 demos
         |        └── 5006    
         ```
-    - Results:
-        |                  | single_category_original | single_category_transfer | single_category_finetuned |
-        |------------------|--------------------------|--------------------------|---------------------------|
-        |      success     |             0.96         |            0.30          |        (0.30) 0.45        |
-        | transfer success |             0.00         |            0.30          |        (0.30) 0.56        |
-
 - Multi-Category
     1. Multi-Category Original (without finetuning)
         ```
@@ -164,12 +151,6 @@ bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
         |    └── category_b                         # 1 demos
         |        └── 5005, 5053, 5028, 5052    
         ```
-    - Results
-        |                  | multi_category_original | multi_category_transfer | multi_category_finetuned |
-        |------------------|-------------------------|-------------------------|--------------------------|
-        |      success     |                         |                         |                          |
-        | transfer success |                         |                         |                          |
-
 ## Setup:
 - Robot: Franka Robot
 - Observation input: 
