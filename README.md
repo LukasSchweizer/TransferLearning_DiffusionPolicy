@@ -1,6 +1,8 @@
 # TransferLearning_DiffusionPolicy
 Repository for the "Deep Learning Lab" offered by the University Freiburg. This project focusses on Transfer Learning with a learned Diffusion Policy.
 
+*See docs/README.md for unabridged install and run instructions*
+
 ## Setup
 With Miniconda installed on your machine, execute the setup script:
 ```bash
@@ -13,19 +15,10 @@ chmod +x conda_env_setup.sh
 # Collect Faucet Assets
 python -m mani_skill2.utils.download_asset partnet_mobility_faucet
 
-# Install Real-Standford Diffusion Policy (RGD/State)
-cd ..
-git clone https://github.com/real-stanford/diffusion_policy.git && cd diffusion_policy
-pip install -e ../diffusion_policy
-
 # Install 3D Diffusion Policy (Point Cloud)
 cd ..
 git clone https://github.com/YanjieZe/3D-Diffusion-Policy.git && cd 3D-Diffusion-Policy
 cd 3D-Diffusion-Policy
-pip install -e .
-
-#Install pointcloud visualizer adn pytorch3d
-cd ../visualizer
 pip install -e .
 cd ../../TransferLearning_DiffusionPolicy
 
@@ -36,12 +29,6 @@ You should now be in the activated conda environment, `dlproject`.
 
 ## Workflow: 
 ### 1. Collecting Demos
-(*Starting with *TurnFaucet* and adding more later.*)
-
-#### **Collect Demonstrations via Keyboard Teleop**
-```bash
-python ManiSkill/data_collection/teleop.py -e "TurnFaucet-v0"
-```
 
 #### **Download Demonstrations**
 ```bash
@@ -50,72 +37,147 @@ gdown https://drive.google.com/drive/folders/1pd9Njg2sOR1VSSmp-c1mT7zCgJEnF8r7 -
 ```
 After downloading you have to unzip it into the demos folder
 
-#### **Create .zarr from Demonstrations**
-```bash
-# Adapt file paths in train.py and run it
-python train.py
+#### **Generate Training Data via Prerecorded Trajectories**
+- Place the downloaded trajectories (.h5 and .json) into the following file structure:
+    - category_a will include any original training faucet models.
+    - category_b will include any transfer faucet models (exclude if not needed)
+- Feel free to change the experiment name, but do not change the names for the subdirectories (category_a and category_b).
+```
+demos
+ ├── your_experiment          # Parent folder, specify as dataset path (change name, pass to train_3dp.py)
+ |    ├── category_a          # First category of faucet, do not change this name
+ |    |   └── *.h5, *.json    # Place any faucets from the first category in here (ex. 5000.h5, 5000.json)
+ |    └── category_b          # First category of faucet, do not change this name
+ |        └── *.h5, *.json    # Place any faucets from the second category in here
 ```
 
-#### **Collect Demonstrations via Prerecorded Trajectories**
-```bash
-# Save RGB
-python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "rgbd"
+- Once you have added all desired models, run the following command at the root directory of the project:
 
-# Save PointCloud (only pointcloud)
-python -m mani_skill2.trajectory.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "pointcloud"
-# with Segmentation
-python -m ManiSkill.data_collection.replay_trajectory --traj-path "demos/TurnFaucet-v0/5000.h5" --vis --count 100 --save-traj -o "pointcloud"
+```bash
+# Generate demonstrations and save as .zarr
+bash scripts/generate_data.sh "demos/your_experiment" 10 2
 ```
+
+- Change the integer args to change number of trajectories to be collected for category_a and category_b respectively.
+- This will save data into .zarr format. 
+- Pass this zarr file location `demos/your_experiment/full_dataset.zarr` into the training script (or hydra file in maniskill2_faucet.yaml at dataset.zarr_path).
 
 ### 2. Train Diffusion Policy
 ```bash
-# 2D Diffusion
-python train.py
-
 # 3D Diffusion
-bash train_3dp.sh dp3 maniskill2_faucet 0322 0 0
+bash scripts/train_3dp.sh dp3 maniskill2_faucet 0322 0 0 your_experiment
 ```
 
 ### 3. Run "TurnFaucet-v0" as controlled the trained diffusion policy
 ```bash
-# 2D Diffusion
-python gym.py --object-id="5000"
-
 # 3D Diffusion
-bash eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
-```
-
-### 4. Figure out how to transfer the policy to another action (5 more actions???)
-```python
-# TODO
+bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 ```
 
 
 ## Methodology:
-1. ```DONE:``` Setup:
-    | Proprioception | Point-cloud size | PC Sampling Method | Transfer-Success     | Same Faucet Success  | Epochs/Demos/Batch/Model  |
-    |----------------|------------------|--------------------|----------------------|----------------------|---------------------------|
-    | qpos + qvel    | 4096             | Uniform Sampling   | 0.0% (reward -)      | 15% (reward 0.1942)  | 200/100/16/5000           |
-    | tcp            | 1024             | Furthest-Point     | 0.0% (reward 0.0570) | 5%  (reward 0.1074)  | 500/100/128/5000          |
-    | qpos + qvel    | 1024             | Furthest-Point     | 0.0% (reward 0.0518) | 10% (reward 0.1537)  | 200/100/16/5000           |
-    | qpos + qvel    | 1024             | Furthest-Point     | 0.0% (reward 0.0518) | 0% (reward 0.0575)   | 3000/10/128/5000          |
-    | qpos + qvel    | 1024             | Furthest-Point     | 0.0% (reward 0.0518) | 5% (reward 0.0575)   | 200/40/128/5001           |
-    | qpos + tcp     | 1024             | Furthest-Point     | -                    | 20% (reward 0.0575)  | 3000/10/128/5001          |
-    | qpos + tcp     | 1024             | Furthest-Point     | -                    | 35% (reward 0.0575)  | 200/40/128/5001           |
-    - Control method: pd_joint_pos
-    - Segmented pointcloud: robot, faucet
+- Single Faucet
+    1. Single Faucet Original (without finetuning)
+        ```
+        demos
+        ├── single_faucet_original          
+        |    └── category_a          # 10 demos
+        |        └── 5001  
+        ```
+    2. Single Faucet Transfer (without finetuning)
+        ```
+        demos
+        ├── single_faucet_transfer         
+        |    └── category_a             # 10 demos
+        |        └── 5006   
+        ```
+    3. Single Faucet Finetuned
+        ```
+        demos
+        ├── single_faucet_finetuned          
+        |    ├── category_a             # 10 demos
+        |    |   └── 5001    
+        |    └── category_b             # 2 Demos
+        |        └── 5006    
+        ```
+    - Results:
+        |                  | single_faucet_original | single_faucet_transfer | single_faucet_finetuned |
+        |------------------|------------------------|------------------------|-------------------------|
+        |      success     |                        |                        |                         |
+        | transfer success |                        |                        |                         |
 
-2. ```DONE:``` Train 3DP on 1 Faucet, see if that is enough to transfer to one similarly categorized faucet 
-    - Failed, overfits on the first faucet
+- Single Category
+    1. Single Category Original (without finetuning)
+        ```
+        demos
+        ├── single_category_original         
+        |    └── category_a                     # 10 demos
+        |        └── 5001, 5037, 5064, 5025   
+        ```
+    2. Single Category Transfer (without finetuning)
+        ```
+        demos
+        ├── single_category_transfer         
+        |    ├── category_a                     # 10 demos
+        |    |   └── 5001, 5037, 5064, 5025   
+        |    └── category_b                     # 10 demos
+        |        └── 5006    
+        ```
+    3. Single Category Finetuned
+        ```
+        demos
+        ├── single_category_finetuned         
+        |    ├── category_a                     # 10 demos
+        |    |   └── 5001, 5037, 5064, 5025   
+        |    └── category_b                     # 2 demos
+        |        └── 5006    
+        ```
+    - Results:
+        |                  | single_category_original | single_category_transfer | single_category_finetuned |
+        |------------------|--------------------------|--------------------------|---------------------------|
+        |      success     |             0.96         |            0.30          |        (0.30) 0.45        |
+        | transfer success |             0.00         |            0.30          |        (0.30) 0.56        |
 
-    | Samples | Training-Faucets | Transfer-Faucet | Epochs | Transfer-Success |
-    |---------|------------------|-----------------|--------|------------------|
-    | 100     | 5000             | 5001            | 175    |                  |
+- Multi-Category
+    1. Multi-Category Original (without finetuning)
+        ```
+        demos
+        ├── multi_category_original         
+        |    └── category_a                         # 10 demos
+        |        └── 5001, 5037, 5064, 5025, 5006    
+        ```
+    2. Multi-Category Transfer (without finetuning)
+        ```
+        demos
+        ├── multi_category_transfer         
+        |    ├── category_a                         # 5 demos
+        |    |   └── 5001, 5037, 5064, 5025, 5006    
+        |    └── category_b                         # 5 demos
+        |        └── 5005, 5053, 5028, 5052    
+        ```
+    3. Multi-Category Finetuned
+        ```
+        demos
+        ├── multi_category_transfer         
+        |    ├── category_a                         # 5 demos
+        |    |   └── 5001, 5037, 5064, 5025, 5006    
+        |    └── category_b                         # 1 demos
+        |        └── 5005, 5053, 5028, 5052    
+        ```
+    - Results
+        |                  | multi_category_original | multi_category_transfer | multi_category_finetuned |
+        |------------------|-------------------------|-------------------------|--------------------------|
+        |      success     |                         |                         |                          |
+        | transfer success |                         |                         |                          |
 
-3. ```TODO:``` Train 3DP on 1 Faucet, but use End Effector Position instead of pd_joint_pos, see if it transfers
-4. ```TODO:``` Train 3DP on many examples of similar faucets, see if it can transfer to other faucets (similar category and other categories)
-5. ```TODO:``` Train 3DP on many examples of multiplce categories of faucets, see if it can transfer to unseen categories
-6. ```TODO:``` If previous successful, do step (4) on new tasks
-    - Cabinet?
-    - Peg Insert?
-    - Object Pickup?
+## Setup:
+- Robot: Franka Robot
+- Observation input: 
+    - Robot State: joint position and tool control point (qpos+tcp)
+    - Segmented pointcloud showing: robot, faucet
+        - Point-cloud size: 1024
+        - Point-cloud sampling method: Furthest-Point Sampling
+- Epochs/Batchsize: 3000/128
+- Control method: pd_joint_pos
+- Segmented pointcloud: robot, faucet
+

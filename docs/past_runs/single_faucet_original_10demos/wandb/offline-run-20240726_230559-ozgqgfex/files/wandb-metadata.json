@@ -1,0 +1,139 @@
+{
+    "os": "Linux-5.15.0-113-generic-x86_64-with-glibc2.31",
+    "python": "3.9.19",
+    "heartbeatAt": "2024-07-26T21:05:59.497103",
+    "startedAt": "2024-07-26T21:05:59.110073",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--config-name=dp3.yaml",
+        "task=maniskill2_faucet",
+        "hydra.run.dir=data/outputs/maniskill2_faucet-dp3-0001_seed0",
+        "training.debug=False",
+        "training.seed=0",
+        "training.device=cuda:0",
+        "exp_name=maniskill2_faucet-dp3-0001",
+        "logging.mode=offline",
+        "checkpoint.save_ckpt=True",
+        "task.dataset.zarr_path=demos/single_faucet_original/full_dataset.zarr"
+    ],
+    "state": "running",
+    "program": "/home/choudhue/TransferLearning_DiffusionPolicy/train_3dp.py",
+    "codePathLocal": "train_3dp.py",
+    "codePath": "train_3dp.py",
+    "git": {
+        "remote": "https://github.com/LukasSchweizer/TransferLearning_DiffusionPolicy.git",
+        "commit": "921073f82e26ebc8a4c02482932bda9403dcfe8d"
+    },
+    "email": "erichchoudhury@gmail.com",
+    "root": "/home/choudhue/TransferLearning_DiffusionPolicy",
+    "host": "espresso",
+    "username": "choudhue",
+    "executable": "/home/choudhue/miniconda3/envs/dlproject/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 1924.9995625,
+        "min": 800.0,
+        "max": 3000.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 861.513,
+            "min": 800.0,
+            "max": 3000.0
+        },
+        {
+            "current": 2000.0,
+            "min": 800.0,
+            "max": 3000.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 871.955322265625,
+            "used": 780.9223709106445
+        }
+    },
+    "gpu": "NVIDIA RTX A4000",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA RTX A4000",
+            "memory_total": 17171480576
+        }
+    ],
+    "memory": {
+        "total": 15.287639617919922
+    }
+}

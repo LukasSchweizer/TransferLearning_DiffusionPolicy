@@ -164,7 +164,6 @@ class ManiSkillTrajectoryDataset(Dataset):
             else:
                 print("No state method specified, defaulting to full proprioception (qpos + qvel).")
                 state = np.concatenate((obs["agent"]["qpos"][i], obs["agent"]["qvel"][i])).astype(np.float32)
-            print(state.shape)
             data_dict.append({
                 "pointcloud": segmented_pointcloud,
                 "rgb": segmented_rgb,

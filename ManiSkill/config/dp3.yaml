@@ -1,5 +1,5 @@
 defaults:
-  - task: adroit_hammer
+  - task: maniskill2_faucet
 
 name: train_dp3
 
@@ -22,6 +22,7 @@ policy:
   use_down_condition: true
   use_mid_condition: true
   use_up_condition: true
+  freeze_unet_down: false
   
   diffusion_step_embed_dim: 128
   down_dims:
@@ -49,7 +50,6 @@ policy:
     steps_offset: 0
     prediction_type: sample
 
-
   num_inference_steps: 10
   obs_as_global_cond: true
   shape_meta: ${shape_meta}
@@ -57,14 +57,12 @@ policy:
   use_pc_color: false
   pointnet_type: "pointnet"
 
-
   pointcloud_encoder_cfg:
     in_channels: 3
     out_channels: ${policy.encoder_output_dim}
     use_layernorm: true
     final_norm: layernorm # layernorm, none
     normal_channel: false
-
 
 ema:
   _target_: diffusion_policy_3d.model.diffusion.ema_model.EMAModel
@@ -75,14 +73,14 @@ ema:
   max_value: 0.9999
 
 dataloader:
-  batch_size: 128
+  batch_size: 480
   num_workers: 8
   shuffle: True
   pin_memory: True
   persistent_workers: False
 
 val_dataloader:
-  batch_size: 128
+  batch_size: 480
   num_workers: 8
   shuffle: False
   pin_memory: True
@@ -102,11 +100,11 @@ training:
   resume: True
   lr_scheduler: cosine
   lr_warmup_steps: 500
-  num_epochs: 3000
+  num_epochs: 3005
   gradient_accumulate_every: 1
   use_ema: True
-  rollout_every: 200
-  checkpoint_every: 200
+  rollout_every: 1000
+  checkpoint_every: 1000
   val_every: 1
   sample_every: 5
   max_train_steps: null
@@ -116,7 +114,7 @@ training:
 logging:
   group: ${exp_name}
   id: null
-  mode: online
+  mode: offline
   name: ${training.seed}
   project: dp3
   resume: true
@@ -124,7 +122,7 @@ logging:
   - dp3
 
 checkpoint:
-  save_ckpt: False # if True, save checkpoint every checkpoint_every
+  save_ckpt: True # if True, save checkpoint every checkpoint_every
   topk:
     monitor_key: test_mean_score
     mode: max

@@ -30,3 +30,4 @@ dependencies:
       - kaleido
       - plotly
       - fpsample==0.3.2
+      - flask

@@ -24,6 +24,7 @@ from termcolor import cprint
 import shutil
 import time
 import threading
+import json
 from hydra.core.hydra_config import HydraConfig
 from diffusion_policy_3d.policy.dp3 import DP3
 from diffusion_policy_3d.dataset.base_dataset import BaseDataset
@@ -148,16 +149,16 @@ class TrainDP3Workspace:
         cprint(f"[WandB] name: {cfg.logging.name}", "yellow")
         cprint("-----------------------------", "yellow")
         # configure logging
-        # wandb_run = wandb.init(
-        #     dir=str(self.output_dir),
-        #     config=OmegaConf.to_container(cfg, resolve=True),
-        #     **cfg.logging
-        # )
-        # wandb.config.update(
-        #     {
-        #         "output_dir": self.output_dir,
-        #     }
-        # )
+        wandb_run = wandb.init(
+            dir=str(self.output_dir),
+            config=OmegaConf.to_container(cfg, resolve=True),
+            **cfg.logging
+        )
+        wandb.config.update(
+            {
+                "output_dir": self.output_dir,
+            }
+        )
 
         # configure checkpoint
         topk_manager = TopKCheckpointManager(
@@ -177,7 +178,7 @@ class TrainDP3Workspace:
 
 
         # training loop
-        log_path = os.path.join(self.output_dir, 'logs.json.txt')
+        log_path = os.path.join(self.output_dir, 'logs.json')
         for local_epoch_idx in range(cfg.training.num_epochs):
             step_log = dict()
             # ========= train for this epoch ==========
@@ -233,7 +234,7 @@ class TrainDP3Workspace:
                     is_last_batch = (batch_idx == (len(train_dataloader)-1))
                     if not is_last_batch:
                         # log of last step is combined with validation and rollout
-                        #wandb_run.log(step_log, step=self.global_step)
+                        wandb_run.log(step_log, step=self.global_step)
                         self.global_step += 1
 
                     if (cfg.training.max_train_steps is not None) \
@@ -252,7 +253,7 @@ class TrainDP3Workspace:
             policy.eval()
 
             # run rollout
-            if (self.epoch % cfg.training.rollout_every) == 0 and RUN_ROLLOUT and env_runner is not None:
+            if (self.epoch % cfg.training.rollout_every) == 0 and RUN_ROLLOUT and env_runner is not None and self.epoch != 0:
                 t3 = time.time()
                 # runner_log = env_runner.run(policy, dataset=dataset)
                 runner_log = env_runner.run(policy)
@@ -304,7 +305,7 @@ class TrainDP3Workspace:
                 step_log['test_mean_score'] = - train_loss
                 
             # checkpoint
-            if (self.epoch % cfg.training.checkpoint_every) == 0 and cfg.checkpoint.save_ckpt:
+            if (self.epoch % cfg.training.checkpoint_every) == 0 and cfg.checkpoint.save_ckpt and self.epoch != 0:
                 # checkpointing
                 if cfg.checkpoint.save_last_ckpt:
                     self.save_checkpoint()
@@ -329,7 +330,16 @@ class TrainDP3Workspace:
 
             # end of epoch
             # log of last step is combined with validation and rollout
-            #wandb_run.log(step_log, step=self.global_step)
+            wandb_run.log(step_log, step=self.global_step)
+            with open(log_path, 'a', encoding='utf-8') as f:
+                if local_epoch_idx == 0:
+                    f.write("[")
+                json.dump(step_log, f, ensure_ascii=False, indent=4)
+                if local_epoch_idx < cfg.training.num_epochs - 1:
+                    f.write(",")
+                else:
+                    f.write("]")
+                f.close()
             self.global_step += 1
             self.epoch += 1
             del step_log
