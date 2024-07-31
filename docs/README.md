@@ -42,18 +42,19 @@ You should now be in the activated conda environment, `dlproject`.
 python ManiSkill/data_collection/teleop.py -e "TurnFaucet-v0"
 ```
 
-#### **OR Download Demonstrations**
+#### **OR**
+#### **Download Demonstrations**
+
 ```bash
-# Download all rigid-body demonstrations (TODO: Download only necessary demos)
-gdown https://drive.google.com/drive/folders/1pd9Njg2sOR1VSSmp-c1mT7zCgJEnF8r7 --folder -O demos/
+# Download TurnFaucet-v0 zip file and unzip all demonstrations
+gdown --id 1KCSaYO_2HtQCCDBDw7twgGcMsD48wRVk -O demos/your_file.zip && unzip demos/your_file.zip -d demos/
 ```
-After downloading you have to unzip it into the demos folder
 
 #### **Collect Demonstrations via Prerecorded Trajectories**
 - In order to streamline the process of data preparation, place the downloaded trajectories (.h5 and .json) into the following file structure.
     - category_a will include any original training faucet models.
     - category_b will include any transfer faucet models (exclude if not needed)
-- Feel free to change the experiment name, but do not change the names for the subdirectories (category_a and category_b).
+- Feel free to change the experiment name, but **do not change the names for the subdirectories (category_a and category_b)**.
 
 ```
 demos
@@ -70,7 +71,7 @@ demos
 bash scripts/generate_data.sh "demos/your_experiment" 10 2
 ```
 
-- Change the integer args to change number of trajectories to be collected for category_a and category_b respectively.
+- Change the integer args to change number of trajectories to be collected per faucet for category_a and category_b respectively.
 - This will save data into .zarr format. 
     - Pass this zarr file location `demos/your_experiment/full_dataset.zarr` into the training script (or hydra file in maniskill2_faucet.yaml at dataset.zarr_path).
 
@@ -96,6 +97,9 @@ bash scripts/train_3dp.sh dp3 maniskill2_faucet 0322 0 0 your_experiment
 # 2D Diffusion
 python train.py
 ```
+For 3D Diffusion:
+- Change the first integer arg (`0322` here) to save training to the name you want
+- Replace `your_experiment` to fit your experiment name
 
 ### 3. Run "TurnFaucet-v0" as controlled the trained diffusion policy
 ```bash
@@ -105,7 +109,9 @@ bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
 # 2D Diffusion
 python gym.py --object-id="5000"
 ```
-
+For 3D Diffusion:
+- Change the first integer arg (`0322` here) to the training name you want to evaluate
+- Replace `your_experiment` to fit your experiment name
 
 ## Methodology:
 - Single Faucet

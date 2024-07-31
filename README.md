@@ -135,8 +135,8 @@ bash scripts/eval_3dp.sh dp3 maniskill2_faucet 0322 0 0
     - Results:
         |                  | single_category_original | single_category_transfer | single_category_finetuned |
         |------------------|--------------------------|--------------------------|---------------------------|
-        |      success     |                          |                          |                           |
-        | transfer success |                          |                          |                           |
+        |      success     |             0.96         |            0.30          |        (0.30) 0.45        |
+        | transfer success |             0.00         |            0.30          |        (0.30) 0.56        |
 
 - Multi-Category
     1. Multi-Category Original (without finetuning)
